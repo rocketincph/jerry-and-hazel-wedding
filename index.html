@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- How to read the text of this file (letters, accents, emoji) -->
+  <meta charset="UTF-8">
+
+  <!-- Tells phones: use the REAL screen width, don't pretend to be a desktop.
+       Without this line, mobile browsers zoom out and everything looks tiny. -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Shows in the browser tab, and as the title in Google results -->
+  <title>Jerry &amp; Hazel — December 27, 2026</title>
+
+  <!-- The grey summary line under the title in Google results,
+       and the preview text when someone shares the link on Messenger/WhatsApp -->
+  <meta name="description"
+        content="Jerry and Hazel are getting married on December 27, 2026 in Tagaytay City. Save the date, RSVP, and find all the details here.">
+
+  <!-- GOOGLE FONTS
+       preconnect = "browser, start shaking hands with Google's font servers now,
+       before you even know which font you need." Saves a few hundred milliseconds. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap"
+    rel="stylesheet">
+
+  <!-- Our own stylesheet. Loaded LAST so it can override anything above it. -->
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- TODO (Phase E): favicon goes here -->
+</head>
+
+<!-- The class on <body> is the switch the JavaScript will flip in Phase C:
+     phase-save-the-date · phase-rsvp-open · phase-married -->
+<body class="phase-save-the-date">
+
+  <!-- ==========================================================
+       HEADER — the constant. Names and date never change,
+       no matter which phase the site is in.
+       ========================================================== -->
+  <header class="site-header">
+    <div class="container site-header__inner">
+
+      <!-- ⚠️ ALL TEXT BELOW IS A MIRROR OF js/copy.js.
+           Edit copy.js, not this file. What is written here only
+           appears if the script fails to run — a safety net, so the
+           page can never come up blank.
+
+           The data-copy attribute is how the script finds each piece. Its value
+           matches a label in copy.js exactly. -->
+
+      <!-- IDENTITY — who and where.
+           Grouped in its own box so that on short screens (phones in
+           landscape) it can sit BESIDE the message instead of above it. -->
+      <div class="site-header__identity">
+
+        <!-- BILINGUAL PAIR: Filipino leads, English translates beneath.
+             lang="en" on the second line tells a screen reader to switch
+             pronunciation — without it, an English sentence gets read
+             with Filipino phonetics, and vice versa. -->
+        <p class="bilingual site-header__invitation">
+          <span class="bilingual__fil" lang="fil" data-copy="hero.invitation.fil"
+            >Malugod namin kayong inaanyayahan sa pag-iisang dibdib nina</span>
+          <span class="bilingual__en" lang="en" data-copy="hero.invitation.en"
+            >We cordially invite you to the wedding of</span>
+        </p>
+
+        <h1 class="site-header__names">
+          <span class="site-header__name" data-copy="hero.name.first">Jerry</span>
+          <span class="site-header__joiner" data-copy="hero.name.joiner">+</span>
+          <span class="site-header__name" data-copy="hero.name.second">Hazel</span>
+        </h1>
+
+      </div>
+
+      <!-- ====== THE ANNOUNCEMENT ======
+           The title and note here are the ONLY parts of the page that
+           change by date. Phase C's JavaScript rewrites them:
+             Phase 1  "Save the Date"   (Oct – mid Nov 2026)
+             Phase 2  "Please Respond"  (mid Nov – Dec 27)
+             Phase 3  "We're Married!"  (Dec 27 onward)
+
+           The DATE deliberately sits inside this block but is never
+           swapped — it belongs with the announcement visually, and a
+           guest needs it in every phase. -->
+      <div class="hero-message" id="hero-message">
+
+        <p class="hero-message__title" id="hero-message-title"
+           data-copy="hero.savethedate.title">Save the Date</p>
+
+        <!-- <time> is a real HTML tag. The datetime attribute is the
+             machine-readable version, so calendars and search engines
+             understand it even though humans read the pretty version.
+             It goes on the Filipino line because that is the primary
+             one — the English line beneath is a translation of the same
+             moment, so it needs no second <time>. -->
+        <p class="bilingual site-header__date">
+
+          <!-- Both Filipino lines sit inside ONE <time>. The two spans
+               are how it reads; the datetime attribute is the single
+               machine value they add up to. Two separate <time> tags
+               would tell a calendar about two different events. -->
+          <time class="date-fil" lang="fil" datetime="2026-12-27T15:00">
+            <span class="bilingual__fil" data-copy="hero.date.fil.day"
+              >Ika-27 ng Disyembre</span>
+            <span class="bilingual__fil" data-copy="hero.date.fil.time"
+              >A las 3 ng hapon</span>
+          </time>
+
+          <span class="bilingual__en" lang="en" data-copy="hero.date.en"
+            >Sunday, December 27, 2026, 3:00 PM</span>
+        </p>
+
+        <!-- ⚠️ VENUE 2 of 2. The other is the meta description above.
+             (The wording itself now lives in copy.js.) -->
+        <p class="site-header__location" data-copy="hero.venue">Tagaytay City</p>
+
+        <p class="bilingual hero-message__note" id="hero-message-note">
+          <span class="bilingual__fil" lang="fil" data-copy="hero.savethedate.note.fil"
+            >Susundan ito ng pormal na paanyaya.</span>
+          <span class="bilingual__en" lang="en" data-copy="hero.savethedate.note.en"
+            >A formal invitation will follow.</span>
+        </p>
+
+        <!-- Filled in by JavaScript, e.g. "120 days to go". Deliberately
+             empty — not even a line break — so :empty can hide it. -->
+        <p class="countdown" id="countdown"></p>
+      </div>
+
+    </div>
+
+    <!-- ====== SCROLL CUE ======
+         A real link, not a decorative arrow: clicking or tabbing to it
+         scrolls the page.
+         The href below is the no-JavaScript fallback: #rsvp is the first
+         section in the document, so this is correct even if the script
+         never runs. script.js then keeps it pointed at the first section
+         actually on the page, so it stays right when a phase removes
+         one — nothing to remember to update later. -->
+    <a class="scroll-cue" href="#rsvp" id="scroll-cue">
+      <span class="visually-hidden" data-copy="hero.scrollcue.label">Scroll down for more</span>
+
+      <!-- aria-hidden hides the drawing from screen readers, because the
+           visually-hidden text above already says what the link does.
+           Without it, the link would be announced twice. -->
+      <svg class="scroll-cue__icon" viewBox="0 0 28 16" aria-hidden="true"
+           fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- currentColor means "whatever colour CSS set on me", so the
+             arrow is styled from the stylesheet like everything else. -->
+        <path d="M1 1 L14 14 L27 1" stroke="currentColor" stroke-width="1.5"
+              stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+    </a>
+  </header>
+
+  <!-- ==========================================================
+       MAIN — two sections:
+         #rsvp          appears mid-Nov 2026, removed after the day
+         #good-to-know  always present, in every phase
+       ========================================================== -->
+  <main>
+
+    <!-- NOTE: there is no longer a separate "Save the Date" section.
+         It lives in the hero above, so the first screenful carries the
+         whole message. See the phase table in the project plan. -->
+
+    <!-- ---------- RSVP (appears mid-Nov 2026) ---------- -->
+    <section id="rsvp" class="section section--rsvp">
+      <div class="container container--narrow">
+
+        <h2 class="section__title" data-copy="rsvp.title">RSVP</h2>
+
+        <p class="section__lead" data-copy="rsvp.lead">
+          Kindly respond by November 30, 2026.
+        </p>
+
+        <!-- The date, time and venue are deliberately NOT repeated here.
+             The hero already carries the date and city, and the ceremony
+             time lives in the "The Day" card under Good to Know. -->
+
+        <!-- FORM UI ONLY — not wired up yet. Phase D connects this
+             to Google Apps Script.
+             We ask for a name and nothing else: everyone here has
+             already been invited, so we know how to reach them. -->
+        <form class="rsvp-form" id="rsvp-form" novalidate>
+
+          <!-- Every input gets a <label>. The label's "for" matches the
+               input's "id" — that link is what lets a screen reader say
+               "Full name, edit text", and lets you tap the label to focus
+               the box. This is not optional politeness; it's accessibility. -->
+          <div class="form-field">
+            <label for="guest-name" data-copy="rsvp.name.label">Full name</label>
+            <input type="text" id="guest-name" name="guestName"
+                   autocomplete="name" required>
+          </div>
+
+          <!-- A group of related radio buttons belongs in a <fieldset>,
+               and <legend> is that group's heading. Without it, a screen
+               reader reads out the two options with no idea what
+               question they answer. -->
+          <fieldset class="form-field form-field--choice">
+            <legend data-copy="rsvp.attending.question">Will you be joining us?</legend>
+
+            <div class="choice-group">
+              <label class="choice">
+                <input type="radio" name="attending" value="yes" required>
+                <span class="choice__text" data-copy="rsvp.attending.yes">Joyfully accepts</span>
+              </label>
+
+              <label class="choice">
+                <input type="radio" name="attending" value="no">
+                <span class="choice__text" data-copy="rsvp.attending.no">Regretfully declines</span>
+              </label>
+            </div>
+
+          </fieldset>
+
+          <!-- SEATS — hidden until someone accepts, because nobody
+               declining needs to see a seat counter. The CSS does the
+               showing and hiding; no JavaScript involved.
+               In Phase D the max will be set from the guest list, so a
+               party invited for 2 cannot reserve 6. -->
+          <div class="form-field form-field--seats">
+            <label for="guest-count" data-copy="rsvp.seats.label">How many of you are coming?</label>
+            <input type="number" id="guest-count" name="guestCount"
+                   min="1" max="10" value="1" inputmode="numeric">
+            <p class="form-help" data-copy="rsvp.seats.help">
+              One response per invitation — it covers everyone named on yours.
+            </p>
+          </div>
+
+          <div class="form-field">
+            <!-- The label is split into two spans because it has two
+                 editable pieces. data-copy replaces an element's TEXT,
+                 so it must sit on the smallest element that holds only
+                 that text — put it on the <label> and it would wipe the
+                 nested span along with it. -->
+            <label for="guest-message">
+              <span data-copy="rsvp.message.label">Anything we should know?</span>
+              <span class="optional" data-copy="rsvp.message.optional">(optional)</span>
+            </label>
+
+            <!-- A placeholder is an ATTRIBUTE, not text inside the tag,
+                 so it needs its own hook. data-copy-placeholder tells the
+                 script to set the attribute rather than the content. -->
+            <textarea id="guest-message" name="guestMessage" rows="3"
+                      data-copy-placeholder="rsvp.message.placeholder"
+                      placeholder="Dietary needs, or a note for the couple"></textarea>
+          </div>
+
+          <button type="submit" class="button" data-copy="rsvp.submit">Send RSVP</button>
+
+          <!-- Phase D writes the "Thank you!" / "Something went wrong"
+               message in here after the form is submitted.
+               role="status" makes a screen reader announce whatever
+               appears here, without stealing focus from the page. -->
+          <p class="form-status" id="form-status" role="status"></p>
+        </form>
+
+      </div>
+    </section>
+
+    <!-- ---------- GOOD TO KNOW (visible in every phase) ----------
+         Everything a guest needs in order to PLAN. This section is
+         never hidden: in Phase 1 it is the only thing below the hero,
+         so it's what the scroll cue points at. -->
+    <section id="good-to-know" class="section section--good-to-know">
+      <div class="container">
+
+        <h2 class="section__title" data-copy="gtk.title">Good to Know</h2>
+
+        <p class="section__lead" data-copy="gtk.lead">
+          A few things to help you plan. More will be added here as the
+          day gets closer.
+        </p>
+
+        <!-- Each card is one topic. <article> is the right tag for a
+             self-contained chunk that would still make sense on its
+             own — which is exactly what these are. -->
+        <div class="info-grid">
+
+          <article class="info-card">
+            <h3 class="info-card__title" data-copy="gtk.day.title">The Day</h3>
+            <p data-copy="gtk.day.text">
+              Ceremony and reception details, and the full order of the day, to follow.
+            </p>
+          </article>
+
+          <article class="info-card">
+            <h3 class="info-card__title" data-copy="gtk.attire.title">Attire</h3>
+            <p data-copy="gtk.attire.text">
+              Formal. Exact dress code and colour palette to be confirmed —
+              check back closer to the date.
+            </p>
+          </article>
+
+          <article class="info-card">
+            <h3 class="info-card__title" data-copy="gtk.getting.title">Getting There</h3>
+            <p data-copy="gtk.getting.text">
+              Tagaytay is roughly a two-hour drive south of Metro Manila,
+              traffic depending. Directions and parking details to follow.
+            </p>
+          </article>
+
+          <article class="info-card">
+            <h3 class="info-card__title" data-copy="gtk.staying.title">Staying Over</h3>
+            <p data-copy="gtk.staying.text">
+              December is peak season in Tagaytay, so book early.
+              Recommended hotels to follow.
+            </p>
+          </article>
+
+          <!-- TODO — future cards slot in here, in this order of priority:
+               Photo Gallery · Our Story · FAQs · Registry
+               (see the project plan, Phase G) -->
+
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==========================================================
+       FOOTER
+       ========================================================== -->
+  <footer class="site-footer">
+    <p class="site-footer__names">Jerry &amp; Hazel</p>
+    <p class="site-footer__date">
+      <time datetime="2026-12-27">27 . 12 . 2026</time>
+    </p>
+  </footer>
+
+  <!-- Script goes at the BOTTOM: the browser reads top to bottom,
+       so by the time it gets here, all the HTML above already exists
+       and the JavaScript can find it. -->
+  <!-- ORDER MATTERS. copy.js only defines the words; script.js uses
+       them. The browser runs these top to bottom, so the words must
+       be loaded before anything tries to read them. -->
+  <script src="js/copy.js"></script>
+  <script src="js/script.js"></script>
+
+</body>
+
+</html>

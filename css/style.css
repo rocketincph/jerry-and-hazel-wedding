@@ -1,0 +1,997 @@
+/* ==========================================================
+   Jerry & Hazel — Wedding Website
+   style.css
+
+   HOW THIS FILE IS ORGANISED (top to bottom, general → specific):
+     1. Design tokens ... every colour, size and space, named once
+     2. Reset ........... flatten the browser's inconsistent defaults
+     3. Base ............ how plain HTML elements look by default
+     4. Layout .......... reusable containers and spacing
+     5. Components ...... the header, sections, form (added next)
+
+   MOBILE-FIRST: everything outside a media query is the phone
+   layout. Media queries only ever ADD things for bigger screens.
+   ========================================================== */
+
+
+/* ==========================================================
+   1. DESIGN TOKENS
+   ========================================================== */
+
+:root {
+
+  /* ---------- Colours ---------- */
+  --color-background:   #F7ECE6; /* cream — main page background */
+  --color-primary:      #6B1F3A; /* burgundy — headlines, borders, brand */
+  --color-primary-dark: #4A1420; /* deep wine — dark section backgrounds */
+  --color-secondary:    #E8B4BE; /* blush — soft accent cards */
+  --color-accent:       #C9A15A; /* gold — dividers, buttons, small details only */
+  --text-on-light:      #2B2320; /* body text on cream/blush */
+  --text-on-dark:       #FBF5F1; /* body text on burgundy/wine */
+
+  /* ---------- Fonts ---------- */
+  --font-script: 'Alex Brush', cursive;        /* names + big headlines only */
+  --font-body:   'Cormorant Garamond', serif;  /* everything else */
+
+  /* ---------- Fluid type scale ----------
+     clamp(MINIMUM, PREFERRED, MAXIMUM)
+     The browser uses PREFERRED, but never lets it go below the
+     minimum or above the maximum. Because PREFERRED contains a
+     "vw" (viewport width) unit, the size scales smoothly with
+     the screen instead of jumping at breakpoints.
+     Read --font-size-base as: "never smaller than 17px, never
+     bigger than 20px, and fluid in between."                    */
+  --font-size-sm:      clamp(0.875rem,  0.84rem + 0.18vw, 1rem);
+  --font-size-base:    clamp(1.0625rem, 1rem    + 0.30vw, 1.25rem);
+  --font-size-md:      clamp(1.25rem,   1.13rem + 0.60vw, 1.6rem);
+  --font-size-lg:      clamp(1.5rem,    1.28rem + 1.10vw, 2.25rem);
+  --font-size-xl:      clamp(1.9rem,    1.50rem + 2.00vw, 3rem);
+  --font-size-display: clamp(3.25rem,   1.80rem + 7.20vw, 7rem);
+
+  /* ---------- Line height & letter spacing ---------- */
+  --line-height-tight:   1.15;  /* big headlines */
+  --line-height-base:    1.6;   /* body copy — generous, easy to read */
+  --letter-spacing-wide: 0.12em; /* small-caps style labels */
+
+  /* ---------- Spacing scale ----------
+     A fixed set of steps, so spacing across the site is
+     consistent instead of a pile of random numbers. */
+  --space-3xs: 0.25rem;
+  --space-2xs: 0.5rem;
+  --space-xs:  0.75rem;
+  --space-sm:  1rem;
+  --space-md:  1.5rem;
+  --space-lg:  2rem;
+  --space-xl:  3rem;
+  --space-2xl: 4rem;
+
+  /* Vertical breathing room around each section — fluid, so
+     sections are compact on a phone and airy on a desktop. */
+  --space-section: clamp(3rem, 2rem + 5vw, 7rem);
+
+  /* ---------- Layout ---------- */
+  --container-width:  68rem; /* ~1088px — max width of normal content */
+  --container-narrow: 38rem; /* ~608px  — max width for paragraphs.
+                                Long lines are genuinely hard to read;
+                                45–75 characters is the sweet spot. */
+
+  /* Space between content and the screen edge. Fluid: a snug
+     20px on a phone, a comfortable 40px on a desktop. */
+  --gutter: clamp(1.25rem, 0.9rem + 1.6vw, 2.5rem);
+
+  --border-thin: 1px solid var(--color-accent);
+  --radius: 2px; /* barely-there corners — this is a formal design */
+
+  /* ---------- Stacking order ----------
+     z-index decides what sits in front of what. Naming the three
+     layers here — instead of scattering z-index: 9999 around the
+     file — means decoration can never accidentally cover the form.
+     Roses, borders and flourishes go on --z-decor. */
+  --z-decor:   0;
+  --z-content: 1;
+  --z-overlay: 2;
+
+  /* An ALIAS, not a new colour: the same off-white as --text-on-dark,
+     renamed for its second job as the surface of inputs and cards
+     sitting on the cream background. Naming a colour by its ROLE is
+     the point of tokens — the same hex can honestly have two roles. */
+  --color-surface: #FBF5F1;
+}
+
+
+/* ==========================================================
+   2. RESET
+   Browsers ship with their own default styles, and they don't
+   all agree. We flatten the handful that cause real problems.
+   ========================================================== */
+
+/* THE most useful line of CSS you will ever learn.
+   By default, if you give a box width:100% and then add padding,
+   the padding is added ON TOP of the 100% — so the box is wider
+   than its parent and the page scrolls sideways. border-box says
+   "padding and border count INSIDE the width." Sideways-scroll
+   bugs mostly vanish. The * means "every element". */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Browsers put a margin on the body and on every heading and
+   paragraph. We zero it, then add spacing back deliberately. */
+body,
+h1, h2, h3, h4,
+p, figure, blockquote,
+dl, dd {
+  margin: 0;
+}
+
+/* The browser's own rule for the [hidden] attribute is weak: any
+   class of ours that sets `display` beats it, so an element we hide
+   from JavaScript would stubbornly stay visible. This makes the
+   attribute mean what it says. One of the few honest uses of
+   !important — it exists precisely to override everything. */
+[hidden] {
+  display: none !important;
+}
+
+/* Media should never be wider than its container — this one rule
+   stops a big photo from blowing out the layout on a phone.
+   height:auto keeps the proportions correct as it shrinks. */
+img,
+picture,
+video,
+svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* Form elements don't inherit the page font by default. Bizarre,
+   but true — without this your inputs render in Arial. */
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+/* Some people set their device to reduce motion, usually because
+   animation triggers migraines or nausea. Respect that. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+
+/* ==========================================================
+   3. BASE — how bare HTML elements look
+   ========================================================== */
+
+html {
+  /* Smooth scrolling for any on-page anchor links we add later */
+  scroll-behavior: smooth;
+
+  /* Stops iOS Safari from silently inflating text in landscape */
+  -webkit-text-size-adjust: 100%;
+
+  /* SCROLL SNAPPING — stops a section half-showing below another.
+     A section is exactly one screen tall, but scrolling is free-form:
+     a thumb-flick stops wherever it stops, so a guest lands mid-way
+     with the bottom of one section and the top of the next.
+
+     "proximity" is the important word. The alternative, "mandatory",
+     forces the page to a snap point every single time — which fights
+     the user, and traps them if a section is taller than the screen.
+     "proximity" only pulls when they've stopped NEAR a boundary
+     anyway, and otherwise leaves the scroll alone.
+
+     To turn this off entirely, delete this one line. */
+  scroll-snap-type: y proximity;
+}
+
+/* Each section is a place the page is willing to settle, aligned so
+   its TOP meets the top of the screen. */
+.site-header,
+.section {
+  scroll-snap-align: start;
+}
+
+/* Note on tall sections: "Good to Know" will be taller than the screen
+   on a phone. That is safe here only BECAUSE we chose "proximity" — it
+   never insists, so the guest can always scroll past. With "mandatory"
+   the bottom of a tall section can become unreachable, since every
+   attempt to scroll past gets yanked back to the top. */
+
+/* Someone who has asked for reduced motion generally does not want
+   the page moving on its own. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-snap-type: none;
+  }
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--text-on-light);
+  font-family: var(--font-body);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-base);
+
+  /* Makes the serif render less chunky on Mac/iOS screens */
+  -webkit-font-smoothing: antialiased;
+
+  /* Even a short page fills the screen, so the cream background
+     covers everything rather than stopping halfway down. */
+  min-height: 100vh;
+}
+
+h1, h2, h3 {
+  line-height: var(--line-height-tight);
+  color: var(--color-primary);
+
+  /* If a very long word can't fit, break it rather than letting
+     it stick out of the screen. Cheap insurance on narrow phones. */
+  overflow-wrap: break-word;
+}
+
+a {
+  color: var(--color-primary);
+  text-underline-offset: 0.2em; /* stops the underline crowding the letters */
+}
+
+/* KEYBOARD ACCESSIBILITY
+   :focus-visible is the ring showing where you are when tabbing
+   with a keyboard. Never delete it — some guests navigate that
+   way. The "-visible" part means it only appears for keyboard
+   users, not as an ugly box on every mouse click. */
+:focus-visible {
+  /* Burgundy, not gold. Gold on cream is about 1.9:1 contrast, and a
+     focus indicator needs 3:1 to be reliably visible — otherwise a
+     keyboard user genuinely cannot tell where they are. Elegance
+     loses this one. */
+  outline: 2px solid var(--color-primary);
+  outline-offset: 3px;
+}
+
+
+/* ==========================================================
+   4. LAYOUT
+   ========================================================== */
+
+/* THE CONTAINER PATTERN — the workhorse of responsive layout.
+     width: 100%          fill the screen on a phone...
+     max-width: 68rem     ...but stop growing on a big monitor
+     margin-inline: auto  centre it once it stops growing
+     padding-inline       always keep breathing room at the edges
+   That's the whole trick. It handles every screen between a
+   320px phone and a 4K monitor in four lines of CSS. */
+.container {
+  width: 100%;
+  max-width: var(--container-width);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+/* For paragraphs: a narrower cap, so lines stay readable
+   instead of stretching to 1000px on a desktop. */
+.container--narrow {
+  max-width: var(--container-narrow);
+}
+
+/* Standard vertical rhythm for every major section */
+.section {
+  padding-block: var(--space-section);
+
+  /* Every section is a positioning context, ready for decoration.
+     An absolutely-positioned rose inside a section will measure
+     itself against THAT SECTION rather than the whole page — so a
+     flourish pinned to a corner stays in its own corner. Cheap to
+     add now, tedious to retrofit later. */
+  position: relative;
+}
+
+/* ---------- DECORATION LAYER ----------
+   For the roses, borders and flourishes still to come. Drop an
+   image inside a section, give it class="decor", position it, done.
+
+   <img class="decor" src="assets/img/rose.png" alt="">
+
+   alt="" (empty, but PRESENT) is the correct way to mark an image
+   as decorative: screen readers skip it entirely. Leaving the alt
+   attribute off altogether makes them read the filename aloud
+   instead, which is worse than nothing. */
+.decor {
+  position: absolute;
+  z-index: var(--z-decor);
+
+  /* Clicks and taps pass straight through. Without this, a rose
+     overlapping the RSVP button would silently swallow taps and
+     the form would appear broken. */
+  pointer-events: none;
+
+  /* Stops a long-press on a phone offering to save the flourish */
+  user-select: none;
+}
+
+/* Content sits above the decoration layer. */
+.container {
+  position: relative;
+  z-index: var(--z-content);
+}
+
+/* Visible to screen readers, invisible on screen. For labels a
+   sighted person infers from context but a blind guest would
+   otherwise miss. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+
+/* ==========================================================
+   5. COMPONENTS
+
+   BREAKPOINTS we'll use, only when a component actually needs one:
+     48rem (768px)  — tablet / small laptop
+     64rem (1024px) — desktop
+   Always min-width. Always additive.
+   ========================================================== */
+
+
+/* ----------------------------------------------------------
+   5.1  SITE HEADER (the hero — first thing a guest sees)
+   ---------------------------------------------------------- */
+
+.site-header {
+  /* position:relative makes this the anchor for anything inside it
+     that uses position:absolute — here, the scroll cue. Without it,
+     the cue would pin itself to the whole page instead of the hero. */
+  position: relative;
+
+  /* FLEXBOX, part 1: turn this element into a flex container.
+     Its children now line up along an axis we control. */
+  display: flex;
+
+  /* Stack children top-to-bottom instead of side-by-side.
+     (The default is "row".) */
+  flex-direction: column;
+
+  /* justify-content works along the MAIN axis. Because we set
+     direction to column, the main axis is vertical — so this
+     centres the block vertically. */
+  justify-content: center;
+
+  /* align-items works along the CROSS axis — here, horizontal.
+     So this centres everything left-to-right.
+     Getting these two the right way round is the single most
+     confusing thing about flexbox. The rule: justify- follows
+     flex-direction, align- is the other one. */
+  align-items: center;
+
+  text-align: center;
+  min-height: 100vh;
+
+  /* svh = "small viewport height". On phones, 100vh is measured
+     as if the browser's address bar were hidden, so a 100vh hero
+     gets its bottom cut off. 100svh accounts for the bar.
+     Browsers that don't know svh ignore this line and keep the
+     vh above — that's PROGRESSIVE ENHANCEMENT: the new value is
+     a bonus, never a requirement. */
+  min-height: 100svh;
+
+  /* Extra room at the bottom so the hero text never collides with
+     the scroll cue sitting down there. */
+  padding-block: var(--space-xl) var(--space-2xl);
+}
+
+.site-header__inner,
+.site-header__identity {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  /* GAP is the modern way to space out flex children. Before it
+     existed you had to add margins to every child and then undo
+     the last one. gap just spaces the gaps. */
+  gap: var(--space-md);
+}
+
+/* --- Bilingual pairs: Filipino leads, English translates beneath --- */
+
+.bilingual {
+  /* The two halves are <span>s, which sit side by side by default.
+     Making them blocks stacks them — and keeps them one <p> as far
+     as the document outline is concerned, because they are two
+     renderings of a single sentence, not two sentences. */
+  max-width: 34rem;
+}
+
+.bilingual__fil,
+.bilingual__en {
+  display: block;
+}
+
+.bilingual__fil {
+  font-size: var(--font-size-base);
+  color: var(--color-primary);
+  letter-spacing: 0.02em;
+}
+
+/* The translation is deliberately quieter: smaller, italic, softer.
+   It should be findable by anyone who needs it and invisible to
+   anyone who doesn't — a whisper under the line, not a second
+   headline competing with the first. */
+.bilingual__en {
+  margin-block-start: var(--space-3xs);
+  font-size: var(--font-size-sm);
+  font-style: italic;
+  color: var(--text-on-light);
+  opacity: 0.7;
+}
+
+.site-header__invitation {
+  /* An invitation line reads as prose, so it keeps sentence case —
+     no uppercase, no wide tracking. */
+  text-wrap: balance; /* evens out the line lengths when it wraps */
+}
+
+/* --- The names --- */
+
+.site-header__names {
+  /* A flex ROW this time, so "Jerry", "&" and "Hazel" sit
+     side by side. */
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+
+  /* flex-wrap: if the three items can't fit on one line, let them
+     drop onto the next instead of overflowing the screen.
+     This one word is doing a lot of responsive work. */
+  flex-wrap: wrap;
+
+  gap: 0 var(--space-sm);
+
+  font-family: var(--font-script);
+  font-size: var(--font-size-display);
+  font-weight: 400;
+  color: var(--color-primary);
+
+  /* Script fonts have long swashes and descenders. A tight line
+     height would clip them, so we give this one room. */
+  line-height: 1.25;
+}
+
+.site-header__joiner {
+  /* em is relative to THIS element's font size, so the joiner stays
+     proportional to the names at every screen size. */
+  font-size: 0.4em;
+
+  /* The "+" is a plain glyph rather than a script flourish, so it
+     needs the body font to look intentional rather than broken. */
+  font-family: var(--font-body);
+
+  /* Softens it without introducing a new colour */
+  opacity: 0.7;
+}
+
+/* --- The date --- */
+
+/* The hairlines that used to flank this are gone: the date is now a
+   two-line bilingual pair, and rules either side of a two-line block
+   look like a mistake rather than a flourish. The gold bar above the
+   announcement does that job instead. */
+/* <time> is inline by default, so it would sit on the same line as
+   whatever follows. Making it a block gives the two lines inside it
+   their own row. */
+.date-fil {
+  display: block;
+}
+
+.site-header__date .bilingual__fil {
+  font-size: var(--font-size-md);
+  letter-spacing: 0.03em;
+  color: var(--text-on-light);
+
+  /* Tighter than the 1.6 used for body copy. Two short stacked lines
+     want to read as ONE unit; body line-height would leave them
+     drifting apart like separate thoughts. */
+  line-height: 1.3;
+}
+
+.site-header__location {
+  font-size: var(--font-size-sm);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  color: var(--color-primary);
+  opacity: 0.8;
+}
+
+/* --- The phase message (the only date-driven part of the page) --- */
+
+.hero-message {
+  /* THE GOLD BAR. It marks where the identity ends and the
+     announcement begins — a visual full stop, so the second half of
+     the hero reads as a distinct beat even though it is all one
+     screen. Because the parent centres its children, this block is
+     only as wide as its widest line, so the bar sizes itself. */
+  border-block-start: var(--border-thin);
+  padding-block-start: var(--space-md);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+
+  max-width: 34rem;
+}
+
+.hero-message__title {
+  font-size: var(--font-size-md);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  color: var(--color-primary);
+}
+
+.hero-message__note {
+  text-align: center;
+}
+
+.countdown {
+  margin-block-start: var(--space-sm);
+  font-size: var(--font-size-sm);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  color: var(--color-primary);
+  opacity: 0.75;
+}
+
+/* :empty matches an element with NOTHING inside — not even a space.
+   Hides the countdown placeholder until JavaScript fills it in. */
+.countdown:empty {
+  display: none;
+}
+
+/* --- The scroll cue --- */
+
+.scroll-cue {
+  /* Pinned to the bottom of the hero. left:50% pushes its LEFT EDGE
+     to the middle, which looks off-centre — translateX(-50%) then
+     slides it back by half its own width. That two-step is the
+     standard way to centre something absolutely positioned. */
+  position: absolute;
+  bottom: var(--space-md);
+  left: 50%;
+  transform: translateX(-50%);
+
+  /* A tap target must be at least 44x44px or people miss it.
+     Flex centres the small arrow inside that larger invisible box. */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.scroll-cue__icon {
+  width: 26px;
+  height: auto;
+
+  /* @keyframes below · 2s per cycle · ease-in-out so it drifts
+     rather than ticks · infinite so it never stops. */
+  animation: scroll-cue-bob 2s ease-in-out infinite;
+}
+
+/* @keyframes defines the steps of an animation. The percentages are
+   points along one cycle: start, middle, end. The browser smoothly
+   fills in everything between them. */
+@keyframes scroll-cue-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.55;
+  }
+  50% {
+    transform: translateY(0.45rem);
+    opacity: 1;
+  }
+}
+
+/* Growing slightly on hover confirms it's clickable */
+.scroll-cue:hover .scroll-cue__icon,
+.scroll-cue:focus-visible .scroll-cue__icon {
+  opacity: 1;
+}
+
+/* The global prefers-reduced-motion rule near the top of this file
+   already stops the bobbing for anyone who asks for less motion.
+   This makes sure they still get a clearly VISIBLE arrow, rather
+   than one frozen mid-fade at 55% opacity. */
+@media (prefers-reduced-motion: reduce) {
+  .scroll-cue__icon {
+    opacity: 1;
+  }
+}
+
+
+/* ----------------------------------------------------------
+   5.2  SECTION FURNITURE (shared by every section)
+   ---------------------------------------------------------- */
+
+.section__title {
+  font-family: var(--font-script);
+  font-size: var(--font-size-xl);
+  font-weight: 400;
+  line-height: 1.25;
+  text-align: center;
+  color: var(--color-primary);
+}
+
+/* A small gold rule under every section title. Same pseudo-element
+   trick as above — decoration lives in CSS, not in the HTML. */
+.section__title::after {
+  content: "";
+  display: block;
+
+  /* An element with a set width and "margin-inline: auto" centres
+     itself. This is the oldest centring trick in CSS. */
+  width: 3rem;
+  height: 1px;
+  margin: var(--space-sm) auto 0;
+
+  background-color: var(--color-accent);
+}
+
+.section__lead {
+  /* Cap the line length for readability, then centre the block. */
+  max-width: var(--container-narrow);
+  margin-inline: auto;
+  margin-block-start: var(--space-lg);
+
+  text-align: center;
+  font-size: var(--font-size-md);
+
+  /* Nudges the reading colour slightly softer than pure headings */
+  color: var(--text-on-light);
+}
+
+
+/* ----------------------------------------------------------
+   5.1b  SHORT SCREENS (mostly phones held sideways)
+
+   Note the query is on HEIGHT, not on "orientation: landscape".
+   The actual problem is a lack of vertical room, and a short
+   desktop window has exactly the same problem as a sideways
+   phone. Describing the real constraint means one rule covers
+   both, instead of two rules chasing device names.
+   ---------------------------------------------------------- */
+
+/* Under ~544px tall: pull everything in. */
+@media (max-height: 34rem) {
+
+  /* Redefining the TOKEN rather than the headline itself. Because
+     every rule refers to var(--font-size-display), changing it here
+     resizes it everywhere at once. This is the payoff for setting
+     up design tokens back at the start. */
+  :root {
+    --font-size-display: clamp(2.5rem, 1.4rem + 4vw, 4rem);
+    --space-section: clamp(2rem, 1.5rem + 3vw, 4rem);
+  }
+
+  .site-header {
+    /* Room at the bottom for the scroll cue to sit without
+       colliding with the text above it. */
+    padding-block: var(--space-sm) 3.5rem;
+  }
+
+  .site-header__identity,
+  .hero-message {
+    gap: var(--space-2xs);
+  }
+
+  .hero-message {
+    padding-block-start: var(--space-2xs);
+  }
+
+  .hero-message__text {
+    font-size: var(--font-size-sm);
+  }
+
+  .scroll-cue {
+    bottom: var(--space-3xs);
+  }
+}
+
+/* Short AND wide enough to have a second column — the landscape
+   phone case. Instead of stacking, we put the two halves of the
+   hero side by side, so its height becomes the TALLER of the two
+   columns rather than the sum of everything. That saves far more
+   vertical space than shrinking type ever could. */
+@media (max-height: 34rem) and (min-width: 34rem) {
+
+  .site-header__inner {
+    /* The one line that does the work: stack becomes row. */
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: var(--space-xl);
+  }
+
+  .hero-message {
+    /* The divider was a line ABOVE the message. Now that the
+       message sits to the right, it becomes a line BESIDE it. */
+    border-block-start: none;
+    border-inline-start: var(--border-thin);
+
+    padding-block-start: 0;
+    padding-inline-start: var(--space-xl);
+    margin-block-start: 0;
+
+    /* Centred text either side of a vertical rule looks unsettled.
+       Ranging the right-hand column left gives the rule a clean
+       edge to sit against. */
+    text-align: start;
+    max-width: 22rem;
+  }
+}
+
+
+/* ----------------------------------------------------------
+   5.3  RSVP — its own screenful
+   ---------------------------------------------------------- */
+
+.section--rsvp {
+  /* A token override scoped to ONE element. Because .section reads
+     padding from var(--space-section), redefining that variable here
+     re-spaces just this section — no need to rewrite the padding rule.
+     Custom properties inherit, so this is the tidiest way to make one
+     component tighter than the rest. */
+  --space-section: clamp(1.5rem, 1rem + 2vw, 4rem);
+
+  /* "At least a screenful." min-height, not height: if the form is
+     taller than the screen the section simply grows rather than
+     clipping. On a desktop it fills the viewport and the RSVP gets
+     undivided attention. */
+  min-height: 100vh;
+  min-height: 100svh;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  /* A soft blush wash sets this section apart from the cream hero,
+     which is what makes it read as a separate "screen".
+     color-mix() blends two colours: 30% blush into the cream
+     background. The plain background-color line above it is the
+     fallback for any browser that doesn't know color-mix. */
+  background-color: var(--color-background);
+  background-color: color-mix(in srgb, var(--color-secondary) 30%, var(--color-background));
+}
+
+/* The lead is a one-line instruction here, not a paragraph, so it
+   doesn't need the larger size the other sections use. */
+.section--rsvp .section__lead {
+  margin-block-start: var(--space-sm);
+  font-size: var(--font-size-base);
+}
+
+/* --- The form --- */
+
+.rsvp-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+
+  margin-block-start: var(--space-lg);
+  text-align: start;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+}
+
+/* Labels sit ABOVE their input, never beside it. On a phone a
+   side-by-side label steals width from the field, and the layout
+   breaks the moment someone increases their text size. */
+.form-field > label,
+.form-field legend {
+  font-size: var(--font-size-sm);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  color: var(--color-primary);
+}
+
+.optional {
+  text-transform: none;
+  letter-spacing: normal;
+  font-style: italic;
+  opacity: 0.7;
+}
+
+.rsvp-form input[type="text"],
+.rsvp-form textarea {
+  width: 100%;
+
+  /* 44px minimum for a comfortable tap target. Padding gets it
+     there without hard-coding a height, so the field still grows
+     if a guest has bumped up their text size. */
+  padding: var(--space-xs) var(--space-sm);
+
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius);
+  color: var(--text-on-light);
+
+  /* Stops iOS Safari zooming in when a field is tapped — it does
+     that whenever the font size is under 16px. */
+  font-size: max(1rem, var(--font-size-base));
+}
+
+.rsvp-form input[type="number"] {
+  width: 6rem;
+  padding: var(--space-xs) var(--space-sm);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius);
+  font-size: max(1rem, var(--font-size-base));
+}
+
+.rsvp-form textarea {
+  resize: vertical; /* let it grow taller, never wider (which would break the layout) */
+  min-height: 4.5rem;
+}
+
+.rsvp-form ::placeholder {
+  color: var(--text-on-light);
+  opacity: 0.5;
+  font-style: italic;
+}
+
+/* --- The attending question --- */
+
+/* Browsers give <fieldset> a default border and odd padding.
+   Reset it, then lay it out ourselves. */
+.form-field--choice {
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+
+.choice-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+  margin-block-start: var(--space-xs);
+}
+
+.choice {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+
+  padding: var(--space-xs) var(--space-sm);
+  min-height: 44px;
+
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+/* accent-color recolours the NATIVE radio button in one line. We
+   keep the browser's own control rather than hiding it and drawing
+   a fake one — the native version already handles keyboard, screen
+   readers and every platform quirk for free. */
+.choice input[type="radio"] {
+  accent-color: var(--color-primary);
+  width: 1.15rem;
+  height: 1.15rem;
+  margin: 0;
+  flex-shrink: 0;
+}
+
+/* :has() lets a parent react to its children — "style this label IF
+   it contains a checked radio". Highlighting the whole box, not just
+   the dot, makes the choice obvious at a glance. */
+.choice:has(input:checked) {
+  background-color: var(--color-secondary);
+  border-width: 2px;
+
+  /* A border growing by 1px would shift the layout. Trimming the
+     padding by the same 1px keeps the box exactly the same size. */
+  padding: calc(var(--space-xs) - 1px) calc(var(--space-sm) - 1px);
+}
+
+.form-help {
+  margin-block-start: var(--space-3xs);
+  font-size: var(--font-size-sm);
+  font-style: italic;
+  opacity: 0.8;
+}
+
+/* --- Seats: shown only to guests who accept ---
+
+   PROGRESSIVE DISCLOSURE, with no JavaScript.
+   The default below is VISIBLE, which is the safe state: if a browser
+   doesn't understand :has(), the guest still gets the field.
+   @supports then asks "do you actually understand :has()?" — and only
+   inside that block do we hide it and reveal it on acceptance. Never
+   hide something by default that you can only bring back with a
+   feature the browser might not have. */
+.form-field--seats {
+  display: flex;
+}
+
+@supports selector(:has(*)) {
+  .form-field--seats {
+    display: none;
+  }
+
+  /* "Style the seats field IF the form contains a checked yes radio."
+     Reading :has() out loud as an if-statement makes it click. */
+  .rsvp-form:has(input[value="yes"]:checked) .form-field--seats {
+    display: flex;
+  }
+}
+
+/* --- Button --- */
+
+.button {
+  align-self: center;
+  width: 100%;
+  max-width: 20rem;
+  min-height: 48px;
+
+  padding: var(--space-xs) var(--space-lg);
+
+  background-color: var(--color-primary);
+  color: var(--text-on-dark);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius);
+
+  font-size: var(--font-size-sm);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  cursor: pointer;
+
+  /* Only transition the properties that actually change. "transition:
+     all" makes the browser watch everything, which is wasteful. */
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.button:hover {
+  background-color: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
+}
+
+.form-status {
+  text-align: center;
+  font-style: italic;
+}
+
+.form-status:empty {
+  display: none;
+}
+
+
+/* ----------------------------------------------------------
+   5.4  GOOD TO KNOW — coming next
+   ---------------------------------------------------------- */

@@ -1,0 +1,123 @@
+/* ==========================================================
+   Jerry & Hazel — Wedding Website
+   script.js
+
+   Note on WHEN this runs: the <script> tag sits at the very
+   bottom of <body>, so by the time the browser reaches it,
+   every element above already exists. That's why we can go
+   looking for things straight away, with no "wait until the
+   page is ready" wrapper.
+   ========================================================== */
+
+'use strict';
+/* 'use strict' turns on stricter error checking. Mostly it stops
+   JavaScript from silently forgiving typos — mistyping a variable
+   name becomes an error instead of quietly creating a new one. */
+
+
+/* ----------------------------------------------------------
+   COPY
+   Write the words from copy.js into the page.
+
+   Every element carrying a data-copy="…" attribute gets its text
+   replaced by the matching entry in COPY. If an entry is missing —
+   a typo in the label, or copy.js failed to load entirely — that
+   element is LEFT ALONE, so the wording already in index.html
+   stands. That is the safety net: broken copy shows old words,
+   never no words.
+   ---------------------------------------------------------- */
+
+var copyTargets = document.querySelectorAll('[data-copy]');
+
+for (var c = 0; c < copyTargets.length; c++) {
+  var key = copyTargets[c].getAttribute('data-copy');
+
+  /* typeof …=== "undefined" is the safe way to ask whether a
+     variable exists at all. Writing `if (COPY)` would itself throw
+     an error when copy.js hasn't loaded. */
+  if (typeof COPY !== 'undefined' && typeof COPY[key] === 'string') {
+
+    /* textContent, not innerHTML. textContent treats the value as
+       plain text; innerHTML would run any HTML or script inside it.
+       Since this text will eventually be edited by hand and may one
+       day come from elsewhere, plain text is the habit to keep. */
+    copyTargets[c].textContent = COPY[key];
+
+  } else {
+    /* A quiet note in the browser Console (F12) naming exactly which
+       label is missing. Invisible to guests. */
+    console.warn('copy.js: no text found for "' + key + '" — using the wording in index.html');
+  }
+}
+
+/* Placeholders are an ATTRIBUTE rather than text inside a tag, so
+   they need their own small loop. Same fallback rule: if the label
+   is missing, whatever index.html already says stays put. */
+var placeholderTargets = document.querySelectorAll('[data-copy-placeholder]');
+
+for (var p = 0; p < placeholderTargets.length; p++) {
+  var pKey = placeholderTargets[p].getAttribute('data-copy-placeholder');
+
+  if (typeof COPY !== 'undefined' && typeof COPY[pKey] === 'string') {
+    placeholderTargets[p].setAttribute('placeholder', COPY[pKey]);
+  }
+}
+
+
+/* ----------------------------------------------------------
+   SCROLL CUE
+   Keep the hero's arrow pointing at the first section that is
+   actually on the page.
+
+   Why bother, when the HTML already says href="#rsvp"?
+   Because in Phase C the RSVP section gets removed outside its
+   dates. If the arrow's target were hardcoded, it would then
+   point at an element that no longer exists and do nothing.
+   Working it out at run time means the arrow is simply always
+   right, with nothing to remember to update.
+   ---------------------------------------------------------- */
+
+/* document.getElementById finds one element by its id attribute.
+   querySelector takes a CSS selector — the same kind you write in
+   the stylesheet — and returns the first match. */
+var scrollCue = document.getElementById('scroll-cue');
+var main = document.querySelector('main');
+
+/* DEFENSIVE CHECK. If either is missing (a typo in the HTML, or a
+   section we delete later), everything below would throw an error
+   and stop the whole file from running — including code we add
+   further down in Phase C. Checking first means a small mistake
+   stays small. */
+if (scrollCue && main) {
+
+  /* querySelectorAll returns EVERY match, not just the first.
+     'section[id]' means "any <section> that has an id attribute" —
+     an id is what an href like "#rsvp" needs to point at. */
+  var sections = main.querySelectorAll('section[id]');
+  var firstVisible = null;
+
+  for (var i = 0; i < sections.length; i++) {
+
+    /* offsetParent is null when an element is hidden with
+       display:none — the browser gives no position to something
+       it isn't drawing. It's a compact way to ask "is this
+       actually on screen?" without checking styles by hand. */
+    if (sections[i].offsetParent !== null) {
+      firstVisible = sections[i];
+      break; /* stop at the first one; we don't need the rest */
+    }
+  }
+
+  if (firstVisible) {
+    /* Setting .href updates the real attribute in the page. The
+       CSS scroll-behavior:smooth we set on <html> then handles
+       the gliding — no scrolling code needed here. */
+    scrollCue.href = '#' + firstVisible.id;
+  } else {
+    /* Nothing below the hero to scroll to, so an arrow would be
+       lying. .hidden is a real HTML attribute: it removes the
+       element for sighted users AND screen readers, which
+       display:none in CSS alone would not do as clearly. */
+    scrollCue.hidden = true;
+  }
+}
