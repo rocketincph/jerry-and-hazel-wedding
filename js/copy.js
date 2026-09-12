@@ -80,8 +80,14 @@ var COPY = {
   /* ⚠️ VENUE — one of only two places it appears. The other is
      the meta description in index.html.
      Only the venue NAME is public. The full street address and the
-     Google Maps link are deliberately NOT on the site yet. */
-  "hero.venue": "Lazuri Hotel Resort — Tagaytay",
+     Google Maps link are deliberately NOT on the site yet.
+
+     Two lines, because it always breaks onto two anyway. Setting
+     them ourselves means the break lands in the same sensible place
+     on every screen, instead of wherever the words happen to run
+     out of room. */
+  "hero.venue.name":  "Lazuri Hotel Resort",
+  "hero.venue.place": "Tagaytay",
 
   /* --- The phase message ---
      The only part of the page that changes by date. Phase C

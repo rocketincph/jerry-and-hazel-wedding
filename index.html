@@ -182,7 +182,13 @@
 
         <!-- ⚠️ VENUE 2 of 2. The other is the meta description above.
              (The wording itself now lives in copy.js.) -->
-        <p class="site-header__location" data-copy="hero.venue"></p>
+        <!-- Two spans rather than one line with a dash, so the break
+             is ours rather than the browser's. CSS makes each a block,
+             which puts them on their own lines at every screen size. -->
+        <p class="site-header__location">
+          <span data-copy="hero.venue.name"></span>
+          <span data-copy="hero.venue.place"></span>
+        </p>
 
         <p class="bilingual hero-message__note" id="hero-message-note">
           <span class="bilingual__fil" lang="fil" data-copy="hero.savethedate.note.fil"
