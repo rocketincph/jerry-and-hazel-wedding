@@ -37,16 +37,31 @@
      clamp(MINIMUM, PREFERRED, MAXIMUM)
      The browser uses PREFERRED, but never lets it go below the
      minimum or above the maximum. Because PREFERRED contains a
-     "vw" (viewport width) unit, the size scales smoothly with
-     the screen instead of jumping at breakpoints.
-     Read --font-size-base as: "never smaller than 17px, never
-     bigger than 20px, and fluid in between."                    */
-  --font-size-sm:      clamp(0.875rem,  0.84rem + 0.18vw, 1rem);
-  --font-size-base:    clamp(1.0625rem, 1rem    + 0.30vw, 1.25rem);
-  --font-size-md:      clamp(1.25rem,   1.13rem + 0.60vw, 1.6rem);
-  --font-size-lg:      clamp(1.5rem,    1.28rem + 1.10vw, 2.25rem);
-  --font-size-xl:      clamp(1.9rem,    1.50rem + 2.00vw, 3rem);
-  --font-size-display: clamp(3.25rem,   1.80rem + 7.20vw, 7rem);
+     "vw" (viewport width) unit, every level scales smoothly with
+     the screen — which is why four levels need no breakpoints.
+
+     FOUR LEVELS, AND ONLY FOUR.
+     Every piece of text on the hero is one of these. The gaps
+     between them are deliberately wide: a guest squinting at a
+     phone should see the ranking instantly, without reading a
+     word. Anything in between two levels blurs that ranking,
+     which is why there is no "slightly bigger than body".
+
+       1  names      the emotional anchor, dominates everything
+       2  title      "Save the Date" — clearly below the names
+       3  body       every practical fact: date, time, venue, note
+       4  whisper    English translations, and nothing else       */
+
+  --font-size-display: clamp(3rem,    9.0vw, 6.5rem);  /* 1 — names   */
+  --font-size-lg:      clamp(1.2rem,  4.0vw, 1.8rem);  /* 2 — title   */
+  --font-size-base:    clamp(1rem,    2.5vw, 1.2rem);  /* 3 — body    */
+  --font-size-sm:      clamp(0.82rem, 1.9vw, 0.92rem); /* 4 — whisper */
+
+  /* Used only by the RSVP and Good to Know sections, which are
+     still hidden and will be restyled onto the four levels when
+     they are finished. Nothing on the hero uses them. */
+  --font-size-md:      clamp(1.25rem,  1.13rem + 0.60vw, 1.6rem);
+  --font-size-xl:      clamp(1.9rem,   1.50rem + 2.00vw, 3rem);
 
   /* ---------- Line height & letter spacing ---------- */
   --line-height-tight:   1.15;  /* big headlines */
@@ -96,9 +111,10 @@
      need the number: the roses themselves, and the padding that
      keeps text from sitting on top of them. One value, one place.
 
-     The curve works out to roughly 40px on a phone and 300px on a
-     desktop — an edge flourish that grows into a full frame. */
-  --rose-width: clamp(2.5rem, 25vw - 3.5rem, 18.75rem);
+     Roughly 56px on a phone, 300px on a desktop. The phone figure
+     went up once the names started stacking instead of running the
+     full width — that freed the side room for a fuller flourish. */
+  --rose-width: clamp(3.5rem, 25vw - 3.5rem, 18.75rem);
 
   /* An ALIAS, not a new colour: the same off-white as --text-on-dark,
      renamed for its second job as the surface of inputs and cards
@@ -228,7 +244,34 @@ html {
 }
 
 body {
+  /* THE WATERCOLOUR.
+     On <body>, so it scrolls with the page — a guest travels down
+     the texture as sections appear, rather than it sitting still.
+
+     WHY "cover" AND NOT "100% auto":
+     100% auto sets the width to the page and lets the height fall
+     where it may. The image is 1920x2880, so on a 390px-wide phone
+     it would finish 585px down — inside the first screen — and the
+     rest would be flat colour. The bottom edge of the artwork is a
+     warm tan, RGB(226,198,166), a long way from the cream below it,
+     so that join is a visible line across the middle of the hero.
+
+     cover scales the image to fill whatever the page is, cropping
+     the overflow rather than stopping. There is no join to see, at
+     any screen size or page length. On a narrow phone it shows a
+     tall centre strip of the wash; on a wide desktop, the full
+     width. Both look like one continuous surface, which is the
+     point of the texture.
+
+     The colour underneath is the fallback: it shows while the image
+     loads and stays if it ever fails, so there is never a white
+     flash. */
   background-color: var(--color-background);
+  background-image: url('../assets/img/JH_BG_MASTER.jpg');
+  background-size: cover;
+  background-position: top center;
+  background-repeat: no-repeat;
+
   color: var(--text-on-light);
   font-family: var(--font-body);
   font-size: var(--font-size-base);
@@ -337,20 +380,17 @@ a {
 }
 
 
-/* ---------- THE FIXED DECORATION PANE ----------
-   Holds the watercolor background and both roses.
+/* ---------- THE FIXED ROSE PANE ----------
+   Holds the two rose frames. The watercolour is NOT here — it is on
+   <body>, so it scrolls with the page.
 
-   WHY FIXED, AND WHY THE BACKGROUND LIVES HERE RATHER THAN ON body:
-   a background on <body> is stretched to cover the whole DOCUMENT.
-   Today the page is one screen so that looks fine — but once the
-   RSVP and Good to Know sections come back the page is several
-   thousand pixels tall, and "cover" would blow the 1920x2880 image
-   up to that height and smear it.
+   That split is deliberate, and gives the page two layers moving at
+   different speeds: the texture travels with the content, while the
+   roses stay pinned to the edges of the screen like the border of an
+   invitation card the content is being read through.
 
-   Pinned to the viewport instead, it always covers exactly one
-   screen, at any page length, and stays put while content scrolls.
-   It is also the correct modern replacement for
-   background-attachment: fixed, which is broken on iOS. */
+   Fixed rather than absolute so the frame holds its place once the
+   page grows past one screen. */
 .page-decor {
   position: fixed;
   inset: 0; /* shorthand for top/right/bottom/left all 0 */
@@ -362,33 +402,37 @@ a {
   pointer-events: none;
   user-select: none;
 
-  /* Keeps a rose from ever causing a sideways scrollbar */
+  /* Keeps a rose from ever causing a sideways scrollbar. It clips
+     nothing else: the roses are sized to fit inside the viewport. */
   overflow: hidden;
 
-  /* The colour is the fallback: it shows while the image loads and
-     stays if the image ever fails, so there is never a white flash. */
-  background-color: var(--color-background);
-  background-image: url('../assets/img/JH_BG_MASTER.jpg');
-  background-size: cover;
-  background-position: center top;
-  background-repeat: no-repeat;
+  /* NO BACKGROUND HERE. The watercolour moved to <body> so it
+     scrolls with the content instead of being pinned. Anything
+     painted here would sit on top of it and hide it, because this
+     pane is fixed across the whole screen. */
 }
 
 .page-decor__rose {
   position: absolute;
-  top: 0;
-  height: 100%;
-  width: var(--rose-width);
 
-  /* The artwork runs the full height of its file, so the frame
-     should run the full height of the screen.
-     object-fit: cover fills that height and trims the width —
-     object-position: left keeps the trim on the INNER edge, so the
-     outer edge of the arrangement is always what you see. On a
-     phone that leaves a narrow ribbon of petals along the edge;
-     on a desktop, most of the arrangement. */
-  object-fit: cover;
-  object-position: left center;
+  /* THE CLIPPING FIX.
+     This used to say height:100% + object-fit:cover, which forces
+     the image to fill the full screen height and TRIMS whatever
+     will not fit across the width. That trim is a dead-straight
+     vertical cut — and it landed exactly where the roses met the
+     text, which is what read as an invisible box around them.
+
+     Now the image simply keeps its own proportions: set the width,
+     let the height follow. Nothing is cut, so the only edges are
+     the ones painted into the artwork, which fade out on their own.
+     The roses look laid onto the page rather than boxed into it. */
+  width: var(--rose-width);
+  height: auto;
+
+  /* Centred against the screen, so the arrangement reads as a frame
+     around the content rather than something anchored to a corner. */
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .page-decor__rose--left {
@@ -397,9 +441,13 @@ a {
 
 .page-decor__rose--right {
   right: 0;
-  /* One image used twice. The browser downloads it once and mirrors
+
+  /* Two transforms on one line. scaleX(-1) mirrors the image;
+     translateY keeps the vertical centring from the rule above —
+     writing transform again REPLACES it, so both must be listed.
+     One image used twice: the browser downloads it once and mirrors
      this copy, so the second rose costs nothing extra to load. */
-  transform: scaleX(-1);
+  transform: translateY(-50%) scaleX(-1);
 }
 
 /* KEEPING TEXT OFF THE ROSES
@@ -577,18 +625,22 @@ a {
 /* --- The names --- */
 
 .site-header__names {
-  /* A flex ROW this time, so "Jerry", "&" and "Hazel" sit
-     side by side. */
+  /* LEVEL 1.
+     Stacked by default — phones get one name per line, with the
+     joiner centred between them:
+
+         Jerry
+           +
+         Hazel
+
+     Letting a row WRAP instead would break it as "Jerry +" then
+     "Hazel", which reads like a line that ran out of room rather
+     than a decision. Stacking deliberately always looks intended. */
   display: flex;
-  align-items: baseline;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
-
-  /* flex-wrap: if the three items can't fit on one line, let them
-     drop onto the next instead of overflowing the screen.
-     This one word is doing a lot of responsive work. */
-  flex-wrap: wrap;
-
-  gap: 0 var(--space-sm);
+  gap: 0;
 
   font-family: var(--font-script);
   font-size: var(--font-size-display);
@@ -600,9 +652,22 @@ a {
   line-height: 1.25;
 }
 
+/* Once there is room for the names to sit on one line, they do.
+   48rem (768px) is roughly where "Jerry + Hazel" stops feeling
+   cramped at Level 1 size. */
+@media (min-width: 48rem) {
+  .site-header__names {
+    flex-direction: row;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0 var(--space-sm);
+  }
+}
+
 .site-header__joiner {
   /* em is relative to THIS element's font size, so the joiner stays
-     proportional to the names at every screen size. */
+     proportional to the names at every screen size — a connector,
+     never a third name. */
   font-size: 0.4em;
 
   /* The "+" is a plain glyph rather than a script flourish, so it
@@ -627,7 +692,9 @@ a {
 }
 
 .site-header__date .bilingual__fil {
-  font-size: var(--font-size-md);
+  /* LEVEL 3 — the date and time are practical facts, exactly as
+     important as the venue, so they sit at body size, not above it. */
+  font-size: var(--font-size-base);
   letter-spacing: 0.03em;
   color: var(--text-on-light);
 
@@ -638,7 +705,9 @@ a {
 }
 
 .site-header__location {
-  font-size: var(--font-size-sm);
+  /* LEVEL 3 — was whisper-sized, which wrongly ranked the venue
+     below the date. Both are facts a guest needs. */
+  font-size: var(--font-size-base);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-wide);
   color: var(--color-primary);
@@ -665,7 +734,8 @@ a {
 }
 
 .hero-message__title {
-  font-size: var(--font-size-md);
+  /* LEVEL 2 */
+  font-size: var(--font-size-lg);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-wide);
   color: var(--color-primary);

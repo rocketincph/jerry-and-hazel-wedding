@@ -20,10 +20,26 @@
       (backslash first). An apostrophe like Jerry's is fine
       as-is — it only matters for double quotes.
 
-   Broken something? The page falls back to the wording built
-   into index.html, so it will never go blank. Press F12 in
-   the browser and look at the Console tab — a red message
-   there names the line number of the problem.
+   ----------------------------------------------------------
+   ⚠️ THIS FILE IS NOW THE ONLY PLACE THE WORDS EXIST.
+
+   index.html used to hold a duplicate as a safety net. It was
+   removed because it drifted out of date twice, and a page
+   quietly showing the WRONG ceremony time is far worse at a
+   wedding than one that is obviously broken.
+
+   The trade: if this file has a typo, the page comes up EMPTY.
+   So check it before you push. In VS Code, open the terminal
+   (Ctrl + ` ) and run:
+
+       node --check js/copy.js
+
+   Silence means it is fine. Any message names the line with
+   the problem. One second, and it catches every typo of this
+   kind before a guest ever sees it.
+
+   You can also just open index.html in your browser and look.
+   If the words are there, the file is good.
    ----------------------------------------------------------
 
    NAMING: the labels read left to right, from broad to
@@ -53,6 +69,13 @@ var COPY = {
   "hero.date.fil.day":  "Ika-27 ng Disyembre",
   "hero.date.fil.time": "1:00 ng hapon",
   "hero.date.en":       "December 27, 2026, 1:00 PM",
+
+  /* ⚠️ The same moment, written for machines — calendars, Google,
+     and link previews read THIS, not the lines above.
+     Format: YYYY-MM-DDTHH:MM on a 24-hour clock.
+       13:00 = 1 PM    15:00 = 3 PM    09:30 = 9:30 AM
+     If the ceremony time changes, change it in all four lines. */
+  "hero.date.machine": "2026-12-27T13:00",
 
   /* ⚠️ VENUE — one of only two places it appears. The other is
      the meta description in index.html.

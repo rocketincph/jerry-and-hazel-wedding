@@ -20,11 +20,14 @@
    Write the words from copy.js into the page.
 
    Every element carrying a data-copy="…" attribute gets its text
-   replaced by the matching entry in COPY. If an entry is missing —
-   a typo in the label, or copy.js failed to load entirely — that
-   element is LEFT ALONE, so the wording already in index.html
-   stands. That is the safety net: broken copy shows old words,
-   never no words.
+   replaced by the matching entry in COPY. The elements in
+   index.html are EMPTY — copy.js is the only place the words
+   exist, so there is exactly one file to edit and nothing that
+   can drift out of sync.
+
+   If a label is missing, that element simply stays empty and a
+   warning naming it appears in the browser Console (F12). Run
+   `node --check js/copy.js` before pushing to catch typos first.
    ---------------------------------------------------------- */
 
 var copyTargets = document.querySelectorAll('[data-copy]');
@@ -50,16 +53,28 @@ for (var c = 0; c < copyTargets.length; c++) {
   }
 }
 
-/* Placeholders are an ATTRIBUTE rather than text inside a tag, so
-   they need their own small loop. Same fallback rule: if the label
-   is missing, whatever index.html already says stays put. */
-var placeholderTargets = document.querySelectorAll('[data-copy-placeholder]');
+/* Some copy is an ATTRIBUTE rather than text inside a tag — a field's
+   placeholder, or the machine-readable datetime. Each gets its own
+   hook named after the attribute it sets:
 
-for (var p = 0; p < placeholderTargets.length; p++) {
-  var pKey = placeholderTargets[p].getAttribute('data-copy-placeholder');
+     data-copy-placeholder="…"  ->  placeholder="…"
+     data-copy-datetime="…"     ->  datetime="…"
 
-  if (typeof COPY !== 'undefined' && typeof COPY[pKey] === 'string') {
-    placeholderTargets[p].setAttribute('placeholder', COPY[pKey]);
+   To support another attribute later, add its name to this list. */
+var COPY_ATTRIBUTES = ['placeholder', 'datetime'];
+
+for (var a = 0; a < COPY_ATTRIBUTES.length; a++) {
+  var attribute = COPY_ATTRIBUTES[a];
+  var attrTargets = document.querySelectorAll('[data-copy-' + attribute + ']');
+
+  for (var t = 0; t < attrTargets.length; t++) {
+    var attrKey = attrTargets[t].getAttribute('data-copy-' + attribute);
+
+    if (typeof COPY !== 'undefined' && typeof COPY[attrKey] === 'string') {
+      attrTargets[t].setAttribute(attribute, COPY[attrKey]);
+    } else {
+      console.warn('copy.js: no text found for "' + attrKey + '"');
+    }
   }
 }
 

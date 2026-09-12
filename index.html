@@ -9,6 +9,18 @@
        Without this line, mobile browsers zoom out and everything looks tiny. -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <!-- ⚠️ THE ONE EXCEPTION TO copy.js ⚠️
+       Everything else on this page gets its words from js/copy.js.
+       These two cannot, and must stay written out here.
+
+       WHY: Google's crawler and the link-preview scrapers behind
+       Messenger, Viber and Facebook read the raw HTML and mostly do
+       NOT run JavaScript. Move these into copy.js and the tab title
+       and share preview would come up blank for them.
+
+       So if the venue, date or time changes, update copy.js AND
+       these two lines. They are the only duplicated words left. -->
+
   <!-- Shows in the browser tab, and as the title in Google results -->
   <title>Jerry &amp; Hazel — December 27, 2026</title>
 
@@ -63,13 +75,22 @@
   <header class="site-header">
     <div class="container site-header__inner">
 
-      <!-- ⚠️ ALL TEXT BELOW IS A MIRROR OF js/copy.js.
-           Edit copy.js, not this file. What is written here only
-           appears if the script fails to run — a safety net, so the
-           page can never come up blank.
+      <!-- ⚠️ THERE IS NO TEXT IN THIS FILE. All of it lives in
+           js/copy.js, which is the single source of truth.
 
-           The data-copy attribute is how the script finds each piece. Its value
-           matches a label in copy.js exactly. -->
+           The empty elements below are labelled slots: the script
+           reads each data-copy value, looks that label up in
+           copy.js, and puts the words in. Editing copy.js is the
+           only thing you ever need to do to change wording.
+
+           They used to carry a duplicate copy as a fallback. That
+           was removed on purpose — the duplicate drifted out of date
+           twice, and a page quietly showing the WRONG ceremony time
+           is far more dangerous at a wedding than one that is
+           obviously broken and gets fixed. -->
+      <!-- data-copy          -> replaces the element's text
+           data-copy-datetime -> sets the datetime attribute
+           data-copy-placeholder -> sets a field's placeholder -->
 
       <!-- IDENTITY — who and where.
            Grouped in its own box so that on short screens (phones in
@@ -82,15 +103,15 @@
              with Filipino phonetics, and vice versa. -->
         <p class="bilingual site-header__invitation">
           <span class="bilingual__fil" lang="fil" data-copy="hero.invitation.fil"
-            >Malugod namin kayong inaanyayahan sa pag-iisang dibdib nina</span>
+            ></span>
           <span class="bilingual__en" lang="en" data-copy="hero.invitation.en"
-            >We cordially invite you to the wedding of</span>
+            ></span>
         </p>
 
         <h1 class="site-header__names">
-          <span class="site-header__name" data-copy="hero.name.first">Jerry</span>
-          <span class="site-header__joiner" data-copy="hero.name.joiner">+</span>
-          <span class="site-header__name" data-copy="hero.name.second">Hazel</span>
+          <span class="site-header__name" data-copy="hero.name.first"></span>
+          <span class="site-header__joiner" data-copy="hero.name.joiner"></span>
+          <span class="site-header__name" data-copy="hero.name.second"></span>
         </h1>
 
       </div>
@@ -108,7 +129,7 @@
       <div class="hero-message" id="hero-message">
 
         <p class="hero-message__title" id="hero-message-title"
-           data-copy="hero.savethedate.title">Save the Date</p>
+           data-copy="hero.savethedate.title"></p>
 
         <!-- <time> is a real HTML tag. The datetime attribute is the
              machine-readable version, so calendars and search engines
@@ -122,30 +143,33 @@
                are how it reads; the datetime attribute is the single
                machine value they add up to. Two separate <time> tags
                would tell a calendar about two different events. -->
-          <!-- ⚠️ datetime is the one piece of text on this page that
-               copy.js CANNOT change — it is an attribute, not content.
-               If the ceremony time ever moves again, change it here by
-               hand. 24-hour clock: 13:00 is 1 PM, 15:00 would be 3 PM. -->
-          <time class="date-fil" lang="fil" datetime="2026-12-27T13:00">
+          <!-- datetime is an ATTRIBUTE, not text, so it needs its own
+               hook. data-copy-datetime tells the script to set the
+               attribute instead of the content — which keeps the
+               machine-readable time in copy.js along with everything
+               else, rather than stranded here where it goes stale. -->
+          <time class="date-fil" lang="fil"
+                data-copy-datetime="hero.date.machine"
+                datetime="2026-12-27T13:00">
             <span class="bilingual__fil" data-copy="hero.date.fil.day"
-              >Ika-27 ng Disyembre</span>
+              ></span>
             <span class="bilingual__fil" data-copy="hero.date.fil.time"
-              >A la 1 ng hapon</span>
+              ></span>
           </time>
 
           <span class="bilingual__en" lang="en" data-copy="hero.date.en"
-            >December 27, 2026, 1:00 PM</span>
+            ></span>
         </p>
 
         <!-- ⚠️ VENUE 2 of 2. The other is the meta description above.
              (The wording itself now lives in copy.js.) -->
-        <p class="site-header__location" data-copy="hero.venue">Lazuri Hotel Resort — Tagaytay</p>
+        <p class="site-header__location" data-copy="hero.venue"></p>
 
         <p class="bilingual hero-message__note" id="hero-message-note">
           <span class="bilingual__fil" lang="fil" data-copy="hero.savethedate.note.fil"
-            >Susundan ito ng pormal na paanyaya.</span>
+            ></span>
           <span class="bilingual__en" lang="en" data-copy="hero.savethedate.note.en"
-            >A formal invitation will follow.</span>
+            ></span>
         </p>
 
         <!-- Filled in by JavaScript, e.g. "120 days to go". Deliberately
@@ -164,7 +188,7 @@
          actually on the page, so it stays right when a phase removes
          one — nothing to remember to update later. -->
     <a class="scroll-cue" href="#rsvp" id="scroll-cue">
-      <span class="visually-hidden" data-copy="hero.scrollcue.label">Scroll down for more</span>
+      <span class="visually-hidden" data-copy="hero.scrollcue.label"></span>
 
       <!-- aria-hidden hides the drawing from screen readers, because the
            visually-hidden text above already says what the link does.
@@ -194,11 +218,9 @@
     <section id="rsvp" class="section section--rsvp">
       <div class="container container--narrow">
 
-        <h2 class="section__title" data-copy="rsvp.title">RSVP</h2>
+        <h2 class="section__title" data-copy="rsvp.title"></h2>
 
-        <p class="section__lead" data-copy="rsvp.lead">
-          Kindly respond by November 30, 2026.
-        </p>
+        <p class="section__lead" data-copy="rsvp.lead"></p>
 
         <!-- The date, time and venue are deliberately NOT repeated here.
              The hero already carries the date and city, and the ceremony
@@ -215,7 +237,7 @@
                "Full name, edit text", and lets you tap the label to focus
                the box. This is not optional politeness; it's accessibility. -->
           <div class="form-field">
-            <label for="guest-name" data-copy="rsvp.name.label">Full name</label>
+            <label for="guest-name" data-copy="rsvp.name.label"></label>
             <input type="text" id="guest-name" name="guestName"
                    autocomplete="name" required>
           </div>
@@ -225,17 +247,17 @@
                reader reads out the two options with no idea what
                question they answer. -->
           <fieldset class="form-field form-field--choice">
-            <legend data-copy="rsvp.attending.question">Will you be joining us?</legend>
+            <legend data-copy="rsvp.attending.question"></legend>
 
             <div class="choice-group">
               <label class="choice">
                 <input type="radio" name="attending" value="yes" required>
-                <span class="choice__text" data-copy="rsvp.attending.yes">Joyfully accepts</span>
+                <span class="choice__text" data-copy="rsvp.attending.yes"></span>
               </label>
 
               <label class="choice">
                 <input type="radio" name="attending" value="no">
-                <span class="choice__text" data-copy="rsvp.attending.no">Regretfully declines</span>
+                <span class="choice__text" data-copy="rsvp.attending.no"></span>
               </label>
             </div>
 
@@ -247,12 +269,10 @@
                In Phase D the max will be set from the guest list, so a
                party invited for 2 cannot reserve 6. -->
           <div class="form-field form-field--seats">
-            <label for="guest-count" data-copy="rsvp.seats.label">How many of you are coming?</label>
+            <label for="guest-count" data-copy="rsvp.seats.label"></label>
             <input type="number" id="guest-count" name="guestCount"
                    min="1" max="10" value="1" inputmode="numeric">
-            <p class="form-help" data-copy="rsvp.seats.help">
-              One response per invitation — it covers everyone named on yours.
-            </p>
+            <p class="form-help" data-copy="rsvp.seats.help"></p>
           </div>
 
           <div class="form-field">
@@ -262,8 +282,8 @@
                  that text — put it on the <label> and it would wipe the
                  nested span along with it. -->
             <label for="guest-message">
-              <span data-copy="rsvp.message.label">Anything we should know?</span>
-              <span class="optional" data-copy="rsvp.message.optional">(optional)</span>
+              <span data-copy="rsvp.message.label"></span>
+              <span class="optional" data-copy="rsvp.message.optional"></span>
             </label>
 
             <!-- A placeholder is an ATTRIBUTE, not text inside the tag,
@@ -274,7 +294,7 @@
                       placeholder="Dietary needs, or a note for the couple"></textarea>
           </div>
 
-          <button type="submit" class="button" data-copy="rsvp.submit">Send RSVP</button>
+          <button type="submit" class="button" data-copy="rsvp.submit"></button>
 
           <!-- Phase D writes the "Thank you!" / "Something went wrong"
                message in here after the form is submitted.
@@ -293,12 +313,9 @@
     <section id="good-to-know" class="section section--good-to-know">
       <div class="container">
 
-        <h2 class="section__title" data-copy="gtk.title">Good to Know</h2>
+        <h2 class="section__title" data-copy="gtk.title"></h2>
 
-        <p class="section__lead" data-copy="gtk.lead">
-          A few things to help you plan. More will be added here as the
-          day gets closer.
-        </p>
+        <p class="section__lead" data-copy="gtk.lead"></p>
 
         <!-- Each card is one topic. <article> is the right tag for a
              self-contained chunk that would still make sense on its
@@ -306,34 +323,23 @@
         <div class="info-grid">
 
           <article class="info-card">
-            <h3 class="info-card__title" data-copy="gtk.day.title">The Day</h3>
-            <p data-copy="gtk.day.text">
-              Ceremony and reception details, and the full order of the day, to follow.
-            </p>
+            <h3 class="info-card__title" data-copy="gtk.day.title"></h3>
+            <p data-copy="gtk.day.text"></p>
           </article>
 
           <article class="info-card">
-            <h3 class="info-card__title" data-copy="gtk.attire.title">Attire</h3>
-            <p data-copy="gtk.attire.text">
-              Formal. Exact dress code and colour palette to be confirmed —
-              check back closer to the date.
-            </p>
+            <h3 class="info-card__title" data-copy="gtk.attire.title"></h3>
+            <p data-copy="gtk.attire.text"></p>
           </article>
 
           <article class="info-card">
-            <h3 class="info-card__title" data-copy="gtk.getting.title">Getting There</h3>
-            <p data-copy="gtk.getting.text">
-              Tagaytay is roughly a two-hour drive south of Metro Manila,
-              traffic depending. Directions and parking details to follow.
-            </p>
+            <h3 class="info-card__title" data-copy="gtk.getting.title"></h3>
+            <p data-copy="gtk.getting.text"></p>
           </article>
 
           <article class="info-card">
-            <h3 class="info-card__title" data-copy="gtk.staying.title">Staying Over</h3>
-            <p data-copy="gtk.staying.text">
-              December is peak season in Tagaytay, so book early.
-              Recommended hotels to follow.
-            </p>
+            <h3 class="info-card__title" data-copy="gtk.staying.title"></h3>
+            <p data-copy="gtk.staying.text"></p>
           </article>
 
           <!-- TODO — future cards slot in here, in this order of priority:
