@@ -1,13 +1,17 @@
 # Jerry & Hazel Wedding Website — Project Plan
 
-**Wedding date:** December 27, 2026 · **Venue:** Tagaytay City (placeholder)
-**Last updated:** August 29, 2026 · **Target launch:** October 2026
+**Wedding date:** December 27, 2026, 1:00 PM · **Venue:** Lazuri Hotel Resort, Tagaytay (confirmed)
+**Last updated:** September 12, 2026 · **Status:** Save the Date is LIVE at jerryandhazel.com
+
+> Technical state, conventions and gotchas live in **CLAUDE.md**. This file is the roadmap and the couple’s open decisions.
 
 ---
 
 ## 1. The big picture
 
-One scrolling website with three built-in "phases" that automatically change **what is on the page** based on the date.
+One scrolling website with three "phases" that change **what is on the page** as the date approaches.
+
+**Revised Sep 12, 2026 — phase switching is MANUAL.** The plan was JavaScript that checked the date and switched automatically. Dropped: it is machinery that can only ever fail silently, to save an edit made three times in fifteen months. A class on the body tag plus one CSS rule do the same job, visibly. See CLAUDE.md.
 
 **Revised Aug 29, 2026** — originally the plan was to keep every section on the page and shift *emphasis* by date. We changed to **showing and removing** sections instead, because de-emphasis is invisible to a guest who never saw the louder version, and because the site would otherwise carry a stale countdown and a closed RSVP form well into 2027.
 
@@ -20,13 +24,17 @@ One scrolling website with three built-in "phases" that automatically change **w
 Three structural decisions that fall out of this:
 
 - **The Save the Date message lives in the hero**, not in its own section — so the whole message lands in the first screenful and a guest who never scrolls still gets it. There is no separate Save the Date section.
-- **There is no standalone "Details" section.** It only restated the date, which the hero already carries. The ceremony time lives in the "The Day" card under Good to Know; the venue appears in exactly two places (the `<head>` meta description and the hero). The RSVP section is the form and nothing else — no repeated facts competing with the thing we want the guest to actually do.
+- **There is no standalone "Details" section.** It only restated the date, which the hero already carries. The ceremony time and venue now sit in the hero; the venue appears in exactly two places (`copy.js` and the meta description). The RSVP section is the form and nothing else — no repeated facts competing with the thing we want the guest to actually do.
 - **Each full-height section snaps.** `scroll-snap-type: y proximity` on `html` stops a guest settling half-way between two sections. `proximity`, never `mandatory` — see the note in `style.css`.
 - **"Good to Know" is visible in every phase.** It holds what a guest needs in order to *plan*: attire, getting there, staying over, and later registry/FAQs/gallery. Guests book flights and leave months ahead for a December wedding in Tagaytay. It also guarantees there is always something below the fold for the scroll cue to point at.
 
 ### Copy lives in one file
 
-**All text on the site is in `js/copy.js`.** Edit there; nothing else needs touching. The wording in `index.html` is a mirror that only appears if the script fails, so the page can never come up blank — it may go slightly stale, and can be refreshed from `copy.js` at any time.
+**All text on the site is in `js/copy.js`.** `index.html` holds no words at all, only labelled empty slots.
+
+The HTML used to carry a duplicate as a fallback. It was removed in September after drifting out of date twice — a page quietly showing the wrong ceremony time is worse at a wedding than one that is obviously broken. The trade is that a typo in `copy.js` leaves the page blank, so run `node --check js/copy.js` before pushing.
+
+One exception: the page title and meta description keep real text, because link-preview scrapers do not run JavaScript. They are flagged in `index.html`.
 
 Copy is **plain text only** — no HTML tags inside `copy.js`. The script writes it with `textContent`, which treats tags as literal characters.
 
@@ -42,11 +50,13 @@ Groundwork is in place so art can be dropped in without restructuring:
 - Decorative images take `alt=""` (empty but present) so screen readers skip them
 - Art goes in `assets/img/` — see the README there
 
-### What actually changes by date
+### What actually changes between phases
 
-Only two things: the hero message (`#hero-message`), and whether the RSVP section is present. Everything else is static.
+Two things: the hero message text, and which sections are visible. Everything else is static.
 
-**Failure mode to respect:** if the JavaScript never runs, the page must show *everything* rather than nothing. A guest seeing a slightly early RSVP form is a small problem; a guest seeing a blank page is a disaster. So sections are present in the HTML by default and removed by script — never the reverse.
+Both are changed **by hand** — the body class in `index.html`, and the one rule in section 5.0 of `style.css`. To publish a finished section, delete its line from that rule.
+
+**Failure mode to respect:** sections are present in the HTML by default and *hidden* by CSS — never hidden by default and revealed by script. If anything fails, the page shows too much rather than nothing.
 
 Sections planned but not built yet (added later, in this order of priority): Photo Gallery → Our Story → FAQs → Registry.
 
@@ -58,7 +68,7 @@ Sections planned but not built yet (added later, in this order of priority): Pho
 
 - [x] Couple's names: Jerry & Hazel
 - [x] Wedding date: December 27, 2026
-- [x] Venue: Tagaytay City (placeholder — swap later)
+- [x] Venue: Lazuri Hotel Resort, Tagaytay — confirmed Sep 2026. Street address and map link deliberately NOT published yet.
 - [x] Structure: single scrolling page, not multiple pages
 - [x] Tech stack: HTML/CSS/JS + Google Sheets for RSVP
 - [x] Editor: VS Code
@@ -67,11 +77,14 @@ Sections planned but not built yet (added later, in this order of priority): Pho
 - [x] Fonts: Alex Brush (script headlines) + Cormorant Garamond (body/serif text) — free via Google Fonts, SIL Open Font License
 - [x] Color palette locked: cream `#F7ECE6` (background), burgundy `#6B1F3A` (primary), deep wine `#4A1420` (primary-dark), blush `#E8B4BE` (secondary), gold `#C9A15A` (accent), `#2B2320` (text-on-light), `#FBF5F1` (text-on-dark)
 
-## 3. Open decisions (blocking next steps)
+## 3. Open decisions
 
 | Decision | Status | Notes |
 |---|---|---|
-| Final venue name | Pending (couple) | Using "Tagaytay City" until confirmed |
+| Real copy for the four Good to Know cards | Pending (Rocket) | Placeholders in `copy.js` are mine, not his |
+| Dress code / colour palette | Pending (couple) | Card currently says "to be confirmed" |
+| When to publish the street address + map link | Pending (couple) | Goes in the "Getting There" card |
+| Whether to keep the venue in uppercase | Pending (Rocket) | Dropped when it was aligned to type level 3 |
 
 ---
 
@@ -83,21 +96,26 @@ Sections planned but not built yet (added later, in this order of priority): Pho
 - [x] Set up project folder + file structure in VS Code
 - [x] Write `style.css` design tokens (CSS variables for colors)
 
-### Phase B — Static structure (build the skeleton)
+### Phase B — Static structure
 - [x] Build `index.html` page skeleton with all section placeholders
 - [x] Style the hero, with the Save the Date message merged into it
 - [x] Add the animated scroll cue
 - [x] Style the RSVP section — form only, its own screenful (not yet functional)
-- [ ] Style the "Good to Know" section (info cards)
-- [ ] Make the layout responsive (mobile-first, since most guests will view on phone)
+- [x] Responsive: mobile-first throughout, plus landscape and short-screen handling
+- [x] Watercolour background + rose frames, separate artwork for phone and desktop
+- [x] Four-level type hierarchy
+- [ ] **Style the "Good to Know" section (info cards)** — the CSS Grid job, next up
+- [ ] Style the footer (never styled; currently hidden for that reason)
 
-### Phase C — The "phase-shifting" logic
-- [ ] Write JavaScript date-check logic (today vs. milestone dates)
-- [ ] Swap the hero message text per phase (`#hero-message`)
-- [ ] Show/remove the RSVP section per phase (removed by JS, present by default)
-- [x] Repoint the scroll cue at the first visible section (done early — `js/script.js`)
-- [ ] Make sure the page still works if JavaScript fails (show everything rather than nothing)
-- [ ] Test by manually faking different dates
+### Phase C — Phase switching ~~(mostly cancelled)~~
+
+The date-checking JavaScript was dropped. Switching is manual: change the body class, edit one CSS rule. Roughly three edits across the whole life of the site.
+
+- [x] Scroll cue finds the first visible section on its own (`js/script.js`)
+- [x] Phase visibility rule (`style.css` section 5.0)
+- [x] Three sets of hero message copy already written in `copy.js`
+- [ ] Mid-Nov 2026: switch body class to `phase-rsvp-open`, unhide `#rsvp`
+- [ ] Dec 27, 2026: switch to `phase-married`
 
 ### Phase D — RSVP backend
 
@@ -148,23 +166,25 @@ Each phase doubles as a coding lesson:
 
 ---
 
-## 6. Where we left off — August 29, 2026
+## 6. Where we left off — September 12, 2026
 
-**Paused here.** The hero and RSVP are a solid first draft; Good to Know is written but unstyled.
+**The Save the Date page is live and public at jerryandhazel.com.** Venue confirmed, copy final, fully decorated. Paused here for a break.
 
-### Done
-- Design tokens, reset, base styles, container/layout system
-- **Hero** — full screen, bilingual, gold bar dividing identity from announcement, short-screen (landscape) two-column handling, animated scroll cue that finds its own target
-- **RSVP** — its own screenful, form only (name · attending · seats · message), seats field appears only on acceptance, blush wash to separate it from the hero
-- **`js/copy.js`** — every word on the site in one editable file, with the HTML as a fallback mirror
-- Scroll snapping (`proximity`), decoration groundwork (`.decor`, z-index tokens, `assets/img/`)
+### Live now
+- **Hero** — one full screen: bilingual invitation line, *Jerry + Hazel*, gold bar, Save the Date, date and time, venue, note
+- **Watercolour background** scrolling with the page, **rose frames** fixed to both edges, separate artwork for phone and desktop
+- Four-level type hierarchy, responsive from 320px to 4K, landscape handled
+- Everything unfinished is hidden behind one CSS rule
+
+### Built but hidden
+- **RSVP** — styled, form only, no backend
+- **Good to Know** — four cards written, completely unstyled
+- **Footer** — never styled
 
 ### Next, in order
-1. Style the **Good to Know** section — four info cards via CSS Grid (four-across to stacked, no media query needed)
-2. Full responsive pass: phone, tablet, desktop, landscape
-3. Then Phase C — the date logic
+1. **Style Good to Know** — four info cards via CSS Grid, four-across to stacked with no media query. Watch for the roses overlapping the wider `.container` on desktop.
+2. **Decide the footer** — style it, or drop it (it only repeats the hero)
+3. **Phase D, the RSVP backend** — the biggest remaining piece. Party-keyed, server-side matching.
+4. Mid-November: switch the body class to `phase-rsvp-open`
 
-### Open questions for the couple
-- Final venue name (still "Tagaytay City")
-- Whether the Filipino date line should carry the year
-- Real copy for the four Good to Know cards
+See `CLAUDE.md` for the technical state, conventions and the gotchas worth knowing before touching anything.
