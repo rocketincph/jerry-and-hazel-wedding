@@ -51,7 +51,7 @@ var COPY = {
      so it reads as an invitation rather than a dense sentence.
      The English line beneath carries the fuller, practical version. */
   "hero.date.fil.day":  "Ika-27 ng Disyembre",
-  "hero.date.fil.time": "A la 1 ng hapon",
+  "hero.date.fil.time": "1:00 ng hapon",
   "hero.date.en":       "December 27, 2026, 1:00 PM",
 
   /* ⚠️ VENUE — one of only two places it appears. The other is
