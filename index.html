@@ -37,6 +37,26 @@
 <body class="phase-save-the-date">
 
   <!-- ==========================================================
+       DECORATION LAYER
+
+       One fixed pane holding the watercolor background and both
+       rose frames. It sits behind everything and never scrolls,
+       so the page reads like content laid on an invitation card.
+
+       It is FIRST in the body deliberately: elements painted later
+       sit on top, which is exactly what we want for the text.
+
+       aria-hidden + empty alt = a screen reader ignores this block
+       entirely. It is decoration, not information.
+       ========================================================== -->
+  <div class="page-decor" aria-hidden="true">
+    <img class="page-decor__rose page-decor__rose--left"
+         src="assets/img/ROSE_FRAME.png" alt="" width="400" height="1200">
+    <img class="page-decor__rose page-decor__rose--right"
+         src="assets/img/ROSE_FRAME.png" alt="" width="400" height="1200">
+  </div>
+
+  <!-- ==========================================================
        HEADER — the constant. Names and date never change,
        no matter which phase the site is in.
        ========================================================== -->

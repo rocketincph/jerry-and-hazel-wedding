@@ -1,0 +1,4 @@
+# Design reference mockup — kept locally, not part of the site.
+# These are duplicates of the files in assets/img/, and git would
+# store them forever even if deleted later.
+preview/

@@ -91,6 +91,15 @@
   --z-content: 1;
   --z-overlay: 2;
 
+  /* ---------- Rose frames ----------
+     How wide each rose is. Named as a token because TWO things
+     need the number: the roses themselves, and the padding that
+     keeps text from sitting on top of them. One value, one place.
+
+     The curve works out to roughly 40px on a phone and 300px on a
+     desktop — an edge flourish that grows into a full frame. */
+  --rose-width: clamp(2.5rem, 25vw - 3.5rem, 18.75rem);
+
   /* An ALIAS, not a new colour: the same off-white as --text-on-dark,
      renamed for its second job as the surface of inputs and cards
      sitting on the cream background. Naming a colour by its ROLE is
@@ -327,6 +336,85 @@ a {
   z-index: var(--z-content);
 }
 
+
+/* ---------- THE FIXED DECORATION PANE ----------
+   Holds the watercolor background and both roses.
+
+   WHY FIXED, AND WHY THE BACKGROUND LIVES HERE RATHER THAN ON body:
+   a background on <body> is stretched to cover the whole DOCUMENT.
+   Today the page is one screen so that looks fine — but once the
+   RSVP and Good to Know sections come back the page is several
+   thousand pixels tall, and "cover" would blow the 1920x2880 image
+   up to that height and smear it.
+
+   Pinned to the viewport instead, it always covers exactly one
+   screen, at any page length, and stays put while content scrolls.
+   It is also the correct modern replacement for
+   background-attachment: fixed, which is broken on iOS. */
+.page-decor {
+  position: fixed;
+  inset: 0; /* shorthand for top/right/bottom/left all 0 */
+  z-index: var(--z-decor);
+
+  /* Clicks, taps and text selection pass straight through to the
+     content above. Without this, the roses would silently swallow
+     taps near the edges of the screen. */
+  pointer-events: none;
+  user-select: none;
+
+  /* Keeps a rose from ever causing a sideways scrollbar */
+  overflow: hidden;
+
+  /* The colour is the fallback: it shows while the image loads and
+     stays if the image ever fails, so there is never a white flash. */
+  background-color: var(--color-background);
+  background-image: url('../assets/img/JH_BG_MASTER.jpg');
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
+}
+
+.page-decor__rose {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: var(--rose-width);
+
+  /* The artwork runs the full height of its file, so the frame
+     should run the full height of the screen.
+     object-fit: cover fills that height and trims the width —
+     object-position: left keeps the trim on the INNER edge, so the
+     outer edge of the arrangement is always what you see. On a
+     phone that leaves a narrow ribbon of petals along the edge;
+     on a desktop, most of the arrangement. */
+  object-fit: cover;
+  object-position: left center;
+}
+
+.page-decor__rose--left {
+  left: 0;
+}
+
+.page-decor__rose--right {
+  right: 0;
+  /* One image used twice. The browser downloads it once and mirrors
+     this copy, so the second rose costs nothing extra to load. */
+  transform: scaleX(-1);
+}
+
+/* KEEPING TEXT OFF THE ROSES
+   On a wide screen the hero text is centred and narrow, so it never
+   reaches the edges — no adjustment needed. Below 64rem the text
+   starts filling the width, so the container has to step inward by
+   the width of a rose plus a little breathing room.
+   This is why --rose-width is a token: the padding tracks the
+   artwork automatically instead of being a number to keep in sync. */
+@media (max-width: 63.999rem) {
+  .container {
+    padding-inline: calc(var(--rose-width) + var(--space-sm));
+  }
+}
+
 /* Visible to screen readers, invisible on screen. For labels a
    sighted person infers from context but a blind guest would
    otherwise miss. */
@@ -471,7 +559,13 @@ a {
   font-size: var(--font-size-sm);
   font-style: italic;
   color: var(--text-on-light);
-  opacity: 0.7;
+
+  /* Was 0.7 on the flat cream. The watercolour texture is darker in
+     places, and measured against its darkest patch this line fell to
+     4.28:1 — under the 4.5:1 minimum, on the smallest text we have.
+     0.85 brings it to 6.21:1 while still reading clearly quieter
+     than the Filipino line above it. */
+  opacity: 0.85;
 }
 
 .site-header__invitation {
