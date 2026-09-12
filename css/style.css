@@ -107,20 +107,34 @@
   --z-overlay: 2;
 
   /* ---------- Rose frames ----------
-     How wide each rose is. Named as a token because TWO things
-     need the number: the roses themselves, and the padding that
-     keeps text from sitting on top of them. One value, one place.
+     How much of each rose is actually ON SCREEN. The rest of the
+     image hangs off the edge — see the anchoring note further down.
 
-     Roughly 56px on a phone, 300px on a desktop. The phone figure
-     went up once the names started stacking instead of running the
-     full width — that freed the side room for a fuller flourish. */
-  --rose-width: clamp(3.5rem, 25vw - 3.5rem, 18.75rem);
+     This is the single number to tune, because it decides both how
+     lush the frame looks and how much room the words get:
+
+        centre lane  =  screen width  -  (2 x this)
+
+     Phones show a narrow strip of the denser 500x900 artwork.
+     Wider screens get more of the taller 400x1200 one, redefined
+     at the 48rem breakpoint below.*/
+  --rose-visible: clamp(4.5rem, 20vw, 7rem);
 
   /* An ALIAS, not a new colour: the same off-white as --text-on-dark,
      renamed for its second job as the surface of inputs and cards
      sitting on the cream background. Naming a colour by its ROLE is
      the point of tokens — the same hex can honestly have two roles. */
   --color-surface: #FBF5F1;
+}
+
+
+/* From 48rem up, <picture> switches to the taller 400x1200 rose
+   and there is room to show much more of it. Same mechanism, bigger
+   strip — which is why this is one token and not two systems. */
+@media (min-width: 48.001rem) {
+  :root {
+    --rose-visible: clamp(7rem, 25vw - 3.5rem, 18.75rem);
+  }
 }
 
 
@@ -414,52 +428,63 @@ a {
 
 .page-decor__rose {
   position: absolute;
+  top: 0;
 
-  /* THE CLIPPING FIX.
-     This used to say height:100% + object-fit:cover, which forces
-     the image to fill the full screen height and TRIMS whatever
-     will not fit across the width. That trim is a dead-straight
-     vertical cut — and it landed exactly where the roses met the
-     text, which is what read as an invisible box around them.
+  /* FULL HEIGHT, EVERY SCREEN.
+     Height is set and width follows from the image's own
+     proportions, so nothing is ever cropped or squashed — the only
+     cut is the edge of the screen itself.
 
-     Now the image simply keeps its own proportions: set the width,
-     let the height follow. Nothing is cut, so the only edges are
-     the ones painted into the artwork, which fade out on their own.
-     The roses look laid onto the page rather than boxed into it. */
-  width: var(--rose-width);
-  height: auto;
+     That means the image is usually WIDER than we want to show. We
+     do not fight that; we let it hang off the edge and show only an
+     inner strip. --rose-visible is how wide that strip is. */
+  height: 100%;
+  width: auto;
 
-  /* Centred against the screen, so the arrangement reads as a frame
-     around the content rather than something anchored to a corner. */
-  top: 50%;
-  transform: translateY(-50%);
+  /* The global img rule caps images at max-width:100%. These are
+     MEANT to be wider than the screen, so the cap has to come off —
+     otherwise the image is squashed to fit and loses its height. */
+  max-width: none;
 }
 
+/* ANCHORING BY THE INNER EDGE.
+   We cannot write "hang 80% off the side", because how wide the
+   image renders depends on how TALL the screen is, and CSS cannot
+   do that arithmetic. So we pin the edge we actually care about.
+
+     right: calc(100% - var(--rose-visible))
+
+   reads as "put this image's RIGHT edge that far in from the left
+   of the screen". The image then runs leftward as far as its own
+   proportions take it, and .page-decor's overflow:hidden trims
+   whatever crosses the edge. The visible strip is exactly
+   --rose-visible at every size, and the overhang looks after
+   itself — on any screen, at any height. */
 .page-decor__rose--left {
-  left: 0;
+  left: auto;
+  right: calc(100% - var(--rose-visible));
 }
 
 .page-decor__rose--right {
-  right: 0;
+  right: auto;
+  left: calc(100% - var(--rose-visible));
 
-  /* Two transforms on one line. scaleX(-1) mirrors the image;
-     translateY keeps the vertical centring from the rule above —
-     writing transform again REPLACES it, so both must be listed.
-     One image used twice: the browser downloads it once and mirrors
-     this copy, so the second rose costs nothing extra to load. */
-  transform: translateY(-50%) scaleX(-1);
+  /* One image used twice — the browser mirrors this copy rather
+     than downloading a second file. */
+  transform: scaleX(-1);
 }
-
 /* KEEPING TEXT OFF THE ROSES
    On a wide screen the hero text is centred and narrow, so it never
-   reaches the edges — no adjustment needed. Below 64rem the text
-   starts filling the width, so the container has to step inward by
-   the width of a rose plus a little breathing room.
-   This is why --rose-width is a token: the padding tracks the
-   artwork automatically instead of being a number to keep in sync. */
+   reaches the edges and needs no help. Below 64rem the text starts
+   filling the width, so the container steps inward by the visible
+   strip plus a little breathing room.
+
+   This is the whole reason --rose-visible is a token: change how
+   much rose shows and the text moves out of its way by itself.
+   Nothing to keep in sync by hand. */
 @media (max-width: 63.999rem) {
   .container {
-    padding-inline: calc(var(--rose-width) + var(--space-sm));
+    padding-inline: calc(var(--rose-visible) + var(--space-sm));
   }
 }
 
@@ -647,9 +672,11 @@ a {
   font-weight: 400;
   color: var(--color-primary);
 
-  /* Script fonts have long swashes and descenders. A tight line
-     height would clip them, so we give this one room. */
-  line-height: 1.25;
+  /* Script fonts carry a lot of empty space above and below the
+     letters. At 1.25 that padding stacked up between the three
+     lines and made the gaps look uneven; 1.05 still clears the
+     swashes but stops them drifting apart. */
+  line-height: 1.05;
 }
 
 /* Once there is room for the names to sit on one line, they do.
@@ -662,6 +689,13 @@ a {
     flex-wrap: wrap;
     gap: 0 var(--space-sm);
   }
+
+  /* The nudge above corrects a VERTICAL gap. Side by side there is
+     no vertical gap to correct, and the same margin would just lift
+     the + off the baseline — so it is cleared here. */
+  .site-header__joiner {
+    margin-block-start: 0;
+  }
 }
 
 .site-header__joiner {
@@ -669,6 +703,18 @@ a {
      proportional to the names at every screen size — a connector,
      never a third name. */
   font-size: 0.4em;
+
+  /* OPTICAL NUDGE, stacked layout only.
+     "Jerry" ends in a descender, so the empty space under it plus
+     the space above the "+" added up, and the gap above the joiner
+     read bigger than the one below it. The two gaps were equal by
+     the numbers and unequal to the eye — which is the only measure
+     that counts. Pulling the + up a touch evens them.
+
+     The value is in the JOINER's own em, and the joiner is 0.4em of
+     the names, so -0.45em here is about -0.18em of a name. Nudge
+     this number if it still looks off on your screen. */
+  margin-block-start: -0.45em;
 
   /* The "+" is a plain glyph rather than a script flourish, so it
      needs the body font to look intentional rather than broken. */
@@ -717,20 +763,33 @@ a {
 /* --- The phase message (the only date-driven part of the page) --- */
 
 .hero-message {
-  /* THE GOLD BAR. It marks where the identity ends and the
-     announcement begins — a visual full stop, so the second half of
-     the hero reads as a distinct beat even though it is all one
-     screen. Because the parent centres its children, this block is
-     only as wide as its widest line, so the bar sizes itself. */
-  border-block-start: var(--border-thin);
-  padding-block-start: var(--space-md);
-
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--space-sm);
 
   max-width: 34rem;
+}
+
+/* THE GOLD BAR. It marks where the identity ends and the
+   announcement begins — a visual full stop, so the second half of
+   the hero reads as a distinct beat even though it is all one screen.
+
+   It used to be border-block-start on the block above. A border can
+   only ever be as wide as the element it sits on, so on a phone it
+   stretched the whole content width and read like a desktop rule
+   dropped onto a small screen. As its own element it can be sized
+   properly — short and centred, in proportion to the screen. */
+.hero-message::before {
+  content: "";
+
+  /* A flex item, so align-items:center on the parent centres it and
+     the parent's gap spaces it. flex:none stops it being stretched
+     or squashed like a normal flexible item. */
+  flex: none;
+  width: clamp(30px, 10vw, 60px);
+  height: 1px;
+  background-color: var(--color-accent);
 }
 
 .hero-message__title {
@@ -928,10 +987,15 @@ a {
     gap: var(--space-xl);
   }
 
+  /* The gold bar sits ABOVE the message everywhere else. Here the
+     message is to the RIGHT of the names, so the divider becomes a
+     vertical rule beside it — and the horizontal bar is switched
+     off, or there would be two dividers doing one job. */
+  .hero-message::before {
+    display: none;
+  }
+
   .hero-message {
-    /* The divider was a line ABOVE the message. Now that the
-       message sits to the right, it becomes a line BESIDE it. */
-    border-block-start: none;
     border-inline-start: var(--border-thin);
 
     padding-block-start: 0;

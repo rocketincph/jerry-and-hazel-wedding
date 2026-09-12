@@ -62,10 +62,29 @@
        entirely. It is decoration, not information.
        ========================================================== -->
   <div class="page-decor" aria-hidden="true">
-    <img class="page-decor__rose page-decor__rose--left"
-         src="assets/img/ROSE_FRAME.png" alt="" width="400" height="1200">
-    <img class="page-decor__rose page-decor__rose--right"
-         src="assets/img/ROSE_FRAME.png" alt="" width="400" height="1200">
+
+    <!-- <picture> is how HTML swaps an image by screen size. The
+         browser reads the <source> rules top to bottom, uses the
+         first one that matches, and falls back to the <img> if none
+         do. Crucially it downloads ONLY the file it picks — a phone
+         never fetches the desktop rose, and vice versa.
+
+         All the styling stays on the <img>; <picture> is just the
+         chooser and adds nothing to the layout. -->
+    <picture>
+      <source media="(max-width: 48rem)"
+              srcset="assets/img/ROSE_FRAME_MOBILE.png" width="500" height="900">
+      <img class="page-decor__rose page-decor__rose--left"
+           src="assets/img/ROSE_FRAME.png" alt="" width="400" height="1200">
+    </picture>
+
+    <picture>
+      <source media="(max-width: 48rem)"
+              srcset="assets/img/ROSE_FRAME_MOBILE.png" width="500" height="900">
+      <img class="page-decor__rose page-decor__rose--right"
+           src="assets/img/ROSE_FRAME.png" alt="" width="400" height="1200">
+    </picture>
+
   </div>
 
   <!-- ==========================================================
