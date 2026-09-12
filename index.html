@@ -122,15 +122,19 @@
                are how it reads; the datetime attribute is the single
                machine value they add up to. Two separate <time> tags
                would tell a calendar about two different events. -->
-          <time class="date-fil" lang="fil" datetime="2026-12-27T15:00">
+          <!-- ⚠️ datetime is the one piece of text on this page that
+               copy.js CANNOT change — it is an attribute, not content.
+               If the ceremony time ever moves again, change it here by
+               hand. 24-hour clock: 13:00 is 1 PM, 15:00 would be 3 PM. -->
+          <time class="date-fil" lang="fil" datetime="2026-12-27T13:00">
             <span class="bilingual__fil" data-copy="hero.date.fil.day"
               >Ika-27 ng Disyembre</span>
             <span class="bilingual__fil" data-copy="hero.date.fil.time"
-              >A las 3 ng hapon</span>
+              >A la 1 ng hapon</span>
           </time>
 
           <span class="bilingual__en" lang="en" data-copy="hero.date.en"
-            >Sunday, December 27, 2026, 3:00 PM</span>
+            >December 27, 2026, 1:00 PM</span>
         </p>
 
         <!-- ⚠️ VENUE 2 of 2. The other is the meta description above.
