@@ -55,8 +55,10 @@ var COPY = {
   "hero.date.en":       "December 27, 2026, 3:00 PM",
 
   /* ⚠️ VENUE — one of only two places it appears. The other is
-     the meta description in index.html. */
-  "hero.venue": "Tagaytay City",
+     the meta description in index.html.
+     Only the venue NAME is public. The full street address and the
+     Google Maps link are deliberately NOT on the site yet. */
+  "hero.venue": "Lazuri Hotel Resort — Tagaytay",
 
   /* --- The phase message ---
      The only part of the page that changes by date. Phase C

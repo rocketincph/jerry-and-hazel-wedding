@@ -353,6 +353,37 @@ a {
 
 
 /* ----------------------------------------------------------
+   5.0  PHASE VISIBILITY
+
+   Which sections are on the page is controlled by ONE class on
+   the <body> tag in index.html, switched BY HAND:
+
+     phase-save-the-date   ← what the site is showing now
+     phase-rsvp-open
+     phase-married
+
+   The HTML for every section always stays in the file. We only
+   hide it here. That way nothing is ever lost, and turning a
+   section back on is a one-line change.
+
+   TO SHOW A SECTION when it's finished: delete its line from the
+   rule below. To show BOTH, change the body class — no rule here
+   matches phase-rsvp-open, so both sections reappear.
+   ---------------------------------------------------------- */
+
+.phase-save-the-date #rsvp,
+.phase-save-the-date #good-to-know,
+.phase-save-the-date .site-footer {
+  display: none;
+}
+
+/* The footer is in that list for a different reason than the two
+   sections: it has never been styled, so it renders as raw text.
+   It also just repeats the names and date already in the hero.
+   Style it before taking it off the list. */
+
+
+/* ----------------------------------------------------------
    5.1  SITE HEADER (the hero — first thing a guest sees)
    ---------------------------------------------------------- */
 

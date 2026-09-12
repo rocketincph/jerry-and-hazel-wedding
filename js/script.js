@@ -70,11 +70,15 @@ for (var p = 0; p < placeholderTargets.length; p++) {
    actually on the page.
 
    Why bother, when the HTML already says href="#rsvp"?
-   Because in Phase C the RSVP section gets removed outside its
-   dates. If the arrow's target were hardcoded, it would then
-   point at an element that no longer exists and do nothing.
-   Working it out at run time means the arrow is simply always
-   right, with nothing to remember to update.
+   Because sections get hidden by the phase rules in style.css.
+   A hardcoded target would point at a hidden section and do
+   nothing when clicked. Working it out at run time means the
+   arrow is always right, with nothing to remember to update.
+
+   It also handles the case we are in TODAY: with both sections
+   hidden there is nothing to scroll to, so the arrow hides
+   itself rather than lying. Un-hide a section in style.css and
+   the arrow comes back on its own.
    ---------------------------------------------------------- */
 
 /* document.getElementById finds one element by its id attribute.
